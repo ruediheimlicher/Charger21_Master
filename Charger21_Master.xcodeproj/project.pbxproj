@@ -1,0 +1,748 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BD56F74A26BC6CD10033C18F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F74926BC6CD10033C18F /* AppDelegate.swift */; };
+		BD56F74C26BC6CD10033C18F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F74B26BC6CD10033C18F /* ViewController.swift */; };
+		BD56F74F26BC6CD10033C18F /* Charger21_Master.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BD56F74D26BC6CD10033C18F /* Charger21_Master.xcdatamodeld */; };
+		BD56F75126BC6CD40033C18F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD56F75026BC6CD40033C18F /* Assets.xcassets */; };
+		BD56F75426BC6CD40033C18F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD56F75226BC6CD40033C18F /* Main.storyboard */; };
+		BD56F76026BC6CD50033C18F /* Charger21_MasterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F75F26BC6CD50033C18F /* Charger21_MasterTests.swift */; };
+		BD56F76B26BC6CD50033C18F /* Charger21_MasterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F76A26BC6CD50033C18F /* Charger21_MasterUITests.swift */; };
+		BD56F77A26BC6D7C0033C18F /* diagramm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F77926BC6D7C0033C18F /* diagramm.swift */; };
+		BD56F77C26BC6DA70033C18F /* abszisse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F77B26BC6DA70033C18F /* abszisse.swift */; };
+		BD56F78026BC6DF60033C18F /* rVertikalanzeige.m in Sources */ = {isa = PBXBuildFile; fileRef = BD56F77F26BC6DF60033C18F /* rVertikalanzeige.m */; };
+		BD56F78426BC6E070033C18F /* usb.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F78126BC6E070033C18F /* usb.swift */; };
+		BD56F78526BC6E070033C18F /* hid.c in Sources */ = {isa = PBXBuildFile; fileRef = BD56F78226BC6E070033C18F /* hid.c */; };
+		BD56F7D726BD2F030033C18F /* halticon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F79C26BD2F030033C18F /* halticon.psd */; };
+		BD56F7D826BD2F030033C18F /* rewindicon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F79D26BD2F030033C18F /* rewindicon.psd */; };
+		BD56F7D926BD2F030033C18F /* playicon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F79E26BD2F030033C18F /* playicon.psd */; };
+		BD56F7DA26BD2F030033C18F /* stopicon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F79F26BD2F030033C18F /* stopicon.psd */; };
+		BD56F7DB26BD2F030033C18F /* gostarticon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7A026BD2F030033C18F /* gostarticon.psd */; };
+		BD56F7DC26BD2F030033C18F /* recordicon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7A126BD2F030033C18F /* recordicon.psd */; };
+		BD56F7DD26BD2F030033C18F /* playicon_weiss.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7A226BD2F030033C18F /* playicon_weiss.psd */; };
+		BD56F7DE26BD2F030033C18F /* stopicon weiss.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7A326BD2F030033C18F /* stopicon weiss.psd */; };
+		BD56F7DF26BD2F030033C18F /* recordicon weiss.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7A426BD2F030033C18F /* recordicon weiss.psd */; };
+		BD56F7E026BD2F030033C18F /* playicon_w.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7A526BD2F030033C18F /* playicon_w.psd */; };
+		BD56F7EE26BD2F030033C18F /* foreward.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7B426BD2F030033C18F /* foreward.psd */; };
+		BD56F7F326BD2F030033C18F /* USB_mod.gif in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7BA26BD2F030033C18F /* USB_mod.gif */; };
+		BD56F7F426BD2F030033C18F /* recordicon.gif in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7BB26BD2F030033C18F /* recordicon.gif */; };
+		BD56F7F526BD2F030033C18F /* USB.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7BC26BD2F030033C18F /* USB.jpeg */; };
+		BD56F7F626BD2F030033C18F /* halticon.gif in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7BD26BD2F030033C18F /* halticon.gif */; };
+		BD56F7F726BD2F030033C18F /* gostarticon.gif in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7BE26BD2F030033C18F /* gostarticon.gif */; };
+		BD56F7F826BD2F030033C18F /* stopicon.gif in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7BF26BD2F030033C18F /* stopicon.gif */; };
+		BD56F7F926BD2F030033C18F /* USB.gif in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7C026BD2F030033C18F /* USB.gif */; };
+		BD56F7FC26BD2F030033C18F /* Kreuz.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7C326BD2F030033C18F /* Kreuz.psd */; };
+		BD56F7FD26BD2F030033C18F /* Start PlayImg.cwk in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7C426BD2F030033C18F /* Start PlayImg.cwk */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BD56F75C26BC6CD50033C18F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD56F73E26BC6CD10033C18F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BD56F74526BC6CD10033C18F;
+			remoteInfo = Charger21_Master;
+		};
+		BD56F76726BC6CD50033C18F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD56F73E26BC6CD10033C18F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BD56F74526BC6CD10033C18F;
+			remoteInfo = Charger21_Master;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		BD56F74626BC6CD10033C18F /* Charger21_Master.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Charger21_Master.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD56F74926BC6CD10033C18F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		BD56F74B26BC6CD10033C18F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		BD56F74E26BC6CD10033C18F /* Charger21_Master.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Charger21_Master.xcdatamodel; sourceTree = "<group>"; };
+		BD56F75026BC6CD40033C18F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BD56F75326BC6CD40033C18F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		BD56F75526BC6CD40033C18F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BD56F75626BC6CD40033C18F /* Charger21_Master.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Charger21_Master.entitlements; sourceTree = "<group>"; };
+		BD56F75B26BC6CD50033C18F /* Charger21_MasterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Charger21_MasterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD56F75F26BC6CD50033C18F /* Charger21_MasterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Charger21_MasterTests.swift; sourceTree = "<group>"; };
+		BD56F76126BC6CD50033C18F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BD56F76626BC6CD50033C18F /* Charger21_MasterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Charger21_MasterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD56F76A26BC6CD50033C18F /* Charger21_MasterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Charger21_MasterUITests.swift; sourceTree = "<group>"; };
+		BD56F76C26BC6CD50033C18F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BD56F77926BC6D7C0033C18F /* diagramm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = diagramm.swift; sourceTree = SOURCE_ROOT; };
+		BD56F77B26BC6DA70033C18F /* abszisse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = abszisse.swift; sourceTree = SOURCE_ROOT; };
+		BD56F77D26BC6DB90033C18F /* rVertikalanzeige.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rVertikalanzeige.h; sourceTree = SOURCE_ROOT; };
+		BD56F77E26BC6DF60033C18F /* Charger21_Master-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Charger21_Master-Bridging-Header.h"; sourceTree = "<group>"; };
+		BD56F77F26BC6DF60033C18F /* rVertikalanzeige.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = rVertikalanzeige.m; sourceTree = SOURCE_ROOT; };
+		BD56F78126BC6E070033C18F /* usb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = usb.swift; sourceTree = SOURCE_ROOT; };
+		BD56F78226BC6E070033C18F /* hid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hid.c; sourceTree = SOURCE_ROOT; };
+		BD56F78326BC6E070033C18F /* hid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hid.h; sourceTree = SOURCE_ROOT; };
+		BD56F79C26BD2F030033C18F /* halticon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = halticon.psd; sourceTree = "<group>"; };
+		BD56F79D26BD2F030033C18F /* rewindicon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = rewindicon.psd; sourceTree = "<group>"; };
+		BD56F79E26BD2F030033C18F /* playicon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = playicon.psd; sourceTree = "<group>"; };
+		BD56F79F26BD2F030033C18F /* stopicon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = stopicon.psd; sourceTree = "<group>"; };
+		BD56F7A026BD2F030033C18F /* gostarticon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = gostarticon.psd; sourceTree = "<group>"; };
+		BD56F7A126BD2F030033C18F /* recordicon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = recordicon.psd; sourceTree = "<group>"; };
+		BD56F7A226BD2F030033C18F /* playicon_weiss.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = playicon_weiss.psd; sourceTree = "<group>"; };
+		BD56F7A326BD2F030033C18F /* stopicon weiss.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = "stopicon weiss.psd"; sourceTree = "<group>"; };
+		BD56F7A426BD2F030033C18F /* recordicon weiss.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = "recordicon weiss.psd"; sourceTree = "<group>"; };
+		BD56F7A526BD2F030033C18F /* playicon_w.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = playicon_w.psd; sourceTree = "<group>"; };
+		BD56F7B426BD2F030033C18F /* foreward.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = foreward.psd; sourceTree = "<group>"; };
+		BD56F7BA26BD2F030033C18F /* USB_mod.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = USB_mod.gif; sourceTree = "<group>"; };
+		BD56F7BB26BD2F030033C18F /* recordicon.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = recordicon.gif; sourceTree = "<group>"; };
+		BD56F7BC26BD2F030033C18F /* USB.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = USB.jpeg; sourceTree = "<group>"; };
+		BD56F7BD26BD2F030033C18F /* halticon.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = halticon.gif; sourceTree = "<group>"; };
+		BD56F7BE26BD2F030033C18F /* gostarticon.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = gostarticon.gif; sourceTree = "<group>"; };
+		BD56F7BF26BD2F030033C18F /* stopicon.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = stopicon.gif; sourceTree = "<group>"; };
+		BD56F7C026BD2F030033C18F /* USB.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = USB.gif; sourceTree = "<group>"; };
+		BD56F7C326BD2F030033C18F /* Kreuz.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = Kreuz.psd; sourceTree = "<group>"; };
+		BD56F7C426BD2F030033C18F /* Start PlayImg.cwk */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Start PlayImg.cwk"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BD56F74326BC6CD10033C18F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD56F75826BC6CD50033C18F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD56F76326BC6CD50033C18F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BD56F73D26BC6CD10033C18F = {
+			isa = PBXGroup;
+			children = (
+				BD56F74826BC6CD10033C18F /* Charger21_Master */,
+				BD56F78826BD2F030033C18F /* Icons */,
+				BD56F75E26BC6CD50033C18F /* Charger21_MasterTests */,
+				BD56F76926BC6CD50033C18F /* Charger21_MasterUITests */,
+				BD56F74726BC6CD10033C18F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BD56F74726BC6CD10033C18F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F74626BC6CD10033C18F /* Charger21_Master.app */,
+				BD56F75B26BC6CD50033C18F /* Charger21_MasterTests.xctest */,
+				BD56F76626BC6CD50033C18F /* Charger21_MasterUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD56F74826BC6CD10033C18F /* Charger21_Master */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F74926BC6CD10033C18F /* AppDelegate.swift */,
+				BD56F74B26BC6CD10033C18F /* ViewController.swift */,
+				BD56F77826BC6D5D0033C18F /* Source */,
+				BD56F75026BC6CD40033C18F /* Assets.xcassets */,
+				BD56F75226BC6CD40033C18F /* Main.storyboard */,
+				BD56F75526BC6CD40033C18F /* Info.plist */,
+				BD56F75626BC6CD40033C18F /* Charger21_Master.entitlements */,
+				BD56F74D26BC6CD10033C18F /* Charger21_Master.xcdatamodeld */,
+			);
+			path = Charger21_Master;
+			sourceTree = "<group>";
+		};
+		BD56F75E26BC6CD50033C18F /* Charger21_MasterTests */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F75F26BC6CD50033C18F /* Charger21_MasterTests.swift */,
+				BD56F76126BC6CD50033C18F /* Info.plist */,
+			);
+			path = Charger21_MasterTests;
+			sourceTree = "<group>";
+		};
+		BD56F76926BC6CD50033C18F /* Charger21_MasterUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F76A26BC6CD50033C18F /* Charger21_MasterUITests.swift */,
+				BD56F76C26BC6CD50033C18F /* Info.plist */,
+			);
+			path = Charger21_MasterUITests;
+			sourceTree = "<group>";
+		};
+		BD56F77826BC6D5D0033C18F /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F78226BC6E070033C18F /* hid.c */,
+				BD56F78326BC6E070033C18F /* hid.h */,
+				BD56F78126BC6E070033C18F /* usb.swift */,
+				BD56F77F26BC6DF60033C18F /* rVertikalanzeige.m */,
+				BD56F77D26BC6DB90033C18F /* rVertikalanzeige.h */,
+				BD56F77B26BC6DA70033C18F /* abszisse.swift */,
+				BD56F77926BC6D7C0033C18F /* diagramm.swift */,
+				BD56F77E26BC6DF60033C18F /* Charger21_Master-Bridging-Header.h */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		BD56F78826BD2F030033C18F /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F79A26BD2F030033C18F /* neue Icons */,
+				BD56F7B926BD2F030033C18F /* icons_gif */,
+				BD56F7C326BD2F030033C18F /* Kreuz.psd */,
+				BD56F7C426BD2F030033C18F /* Start PlayImg.cwk */,
+			);
+			path = Icons;
+			sourceTree = "<group>";
+		};
+		BD56F79A26BD2F030033C18F /* neue Icons */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F79C26BD2F030033C18F /* halticon.psd */,
+				BD56F79D26BD2F030033C18F /* rewindicon.psd */,
+				BD56F79E26BD2F030033C18F /* playicon.psd */,
+				BD56F79F26BD2F030033C18F /* stopicon.psd */,
+				BD56F7A026BD2F030033C18F /* gostarticon.psd */,
+				BD56F7A126BD2F030033C18F /* recordicon.psd */,
+				BD56F7A226BD2F030033C18F /* playicon_weiss.psd */,
+				BD56F7A326BD2F030033C18F /* stopicon weiss.psd */,
+				BD56F7A426BD2F030033C18F /* recordicon weiss.psd */,
+				BD56F7A526BD2F030033C18F /* playicon_w.psd */,
+				BD56F7B426BD2F030033C18F /* foreward.psd */,
+			);
+			path = "neue Icons";
+			sourceTree = "<group>";
+		};
+		BD56F7B926BD2F030033C18F /* icons_gif */ = {
+			isa = PBXGroup;
+			children = (
+				BD56F7BA26BD2F030033C18F /* USB_mod.gif */,
+				BD56F7BB26BD2F030033C18F /* recordicon.gif */,
+				BD56F7BC26BD2F030033C18F /* USB.jpeg */,
+				BD56F7BD26BD2F030033C18F /* halticon.gif */,
+				BD56F7BE26BD2F030033C18F /* gostarticon.gif */,
+				BD56F7BF26BD2F030033C18F /* stopicon.gif */,
+				BD56F7C026BD2F030033C18F /* USB.gif */,
+			);
+			path = icons_gif;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BD56F74526BC6CD10033C18F /* Charger21_Master */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD56F76F26BC6CD50033C18F /* Build configuration list for PBXNativeTarget "Charger21_Master" */;
+			buildPhases = (
+				BD56F74226BC6CD10033C18F /* Sources */,
+				BD56F74326BC6CD10033C18F /* Frameworks */,
+				BD56F74426BC6CD10033C18F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Charger21_Master;
+			productName = Charger21_Master;
+			productReference = BD56F74626BC6CD10033C18F /* Charger21_Master.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BD56F75A26BC6CD50033C18F /* Charger21_MasterTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD56F77226BC6CD50033C18F /* Build configuration list for PBXNativeTarget "Charger21_MasterTests" */;
+			buildPhases = (
+				BD56F75726BC6CD50033C18F /* Sources */,
+				BD56F75826BC6CD50033C18F /* Frameworks */,
+				BD56F75926BC6CD50033C18F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD56F75D26BC6CD50033C18F /* PBXTargetDependency */,
+			);
+			name = Charger21_MasterTests;
+			productName = Charger21_MasterTests;
+			productReference = BD56F75B26BC6CD50033C18F /* Charger21_MasterTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BD56F76526BC6CD50033C18F /* Charger21_MasterUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD56F77526BC6CD50033C18F /* Build configuration list for PBXNativeTarget "Charger21_MasterUITests" */;
+			buildPhases = (
+				BD56F76226BC6CD50033C18F /* Sources */,
+				BD56F76326BC6CD50033C18F /* Frameworks */,
+				BD56F76426BC6CD50033C18F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD56F76826BC6CD50033C18F /* PBXTargetDependency */,
+			);
+			name = Charger21_MasterUITests;
+			productName = Charger21_MasterUITests;
+			productReference = BD56F76626BC6CD50033C18F /* Charger21_MasterUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD56F73E26BC6CD10033C18F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1250;
+				LastUpgradeCheck = 1250;
+				TargetAttributes = {
+					BD56F74526BC6CD10033C18F = {
+						CreatedOnToolsVersion = 12.5.1;
+						LastSwiftMigration = 1250;
+					};
+					BD56F75A26BC6CD50033C18F = {
+						CreatedOnToolsVersion = 12.5.1;
+						TestTargetID = BD56F74526BC6CD10033C18F;
+					};
+					BD56F76526BC6CD50033C18F = {
+						CreatedOnToolsVersion = 12.5.1;
+						TestTargetID = BD56F74526BC6CD10033C18F;
+					};
+				};
+			};
+			buildConfigurationList = BD56F74126BC6CD10033C18F /* Build configuration list for PBXProject "Charger21_Master" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BD56F73D26BC6CD10033C18F;
+			productRefGroup = BD56F74726BC6CD10033C18F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BD56F74526BC6CD10033C18F /* Charger21_Master */,
+				BD56F75A26BC6CD50033C18F /* Charger21_MasterTests */,
+				BD56F76526BC6CD50033C18F /* Charger21_MasterUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BD56F74426BC6CD10033C18F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD56F75126BC6CD40033C18F /* Assets.xcassets in Resources */,
+				BD56F7F926BD2F030033C18F /* USB.gif in Resources */,
+				BD56F7FD26BD2F030033C18F /* Start PlayImg.cwk in Resources */,
+				BD56F7F726BD2F030033C18F /* gostarticon.gif in Resources */,
+				BD56F7D826BD2F030033C18F /* rewindicon.psd in Resources */,
+				BD56F7EE26BD2F030033C18F /* foreward.psd in Resources */,
+				BD56F7D926BD2F030033C18F /* playicon.psd in Resources */,
+				BD56F7FC26BD2F030033C18F /* Kreuz.psd in Resources */,
+				BD56F75426BC6CD40033C18F /* Main.storyboard in Resources */,
+				BD56F7DE26BD2F030033C18F /* stopicon weiss.psd in Resources */,
+				BD56F7F526BD2F030033C18F /* USB.jpeg in Resources */,
+				BD56F7D726BD2F030033C18F /* halticon.psd in Resources */,
+				BD56F7F426BD2F030033C18F /* recordicon.gif in Resources */,
+				BD56F7DD26BD2F030033C18F /* playicon_weiss.psd in Resources */,
+				BD56F7DA26BD2F030033C18F /* stopicon.psd in Resources */,
+				BD56F7DC26BD2F030033C18F /* recordicon.psd in Resources */,
+				BD56F7F826BD2F030033C18F /* stopicon.gif in Resources */,
+				BD56F7F626BD2F030033C18F /* halticon.gif in Resources */,
+				BD56F7F326BD2F030033C18F /* USB_mod.gif in Resources */,
+				BD56F7DF26BD2F030033C18F /* recordicon weiss.psd in Resources */,
+				BD56F7DB26BD2F030033C18F /* gostarticon.psd in Resources */,
+				BD56F7E026BD2F030033C18F /* playicon_w.psd in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD56F75926BC6CD50033C18F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD56F76426BC6CD50033C18F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BD56F74226BC6CD10033C18F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD56F74C26BC6CD10033C18F /* ViewController.swift in Sources */,
+				BD56F74A26BC6CD10033C18F /* AppDelegate.swift in Sources */,
+				BD56F78426BC6E070033C18F /* usb.swift in Sources */,
+				BD56F78526BC6E070033C18F /* hid.c in Sources */,
+				BD56F74F26BC6CD10033C18F /* Charger21_Master.xcdatamodeld in Sources */,
+				BD56F77A26BC6D7C0033C18F /* diagramm.swift in Sources */,
+				BD56F78026BC6DF60033C18F /* rVertikalanzeige.m in Sources */,
+				BD56F77C26BC6DA70033C18F /* abszisse.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD56F75726BC6CD50033C18F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD56F76026BC6CD50033C18F /* Charger21_MasterTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD56F76226BC6CD50033C18F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD56F76B26BC6CD50033C18F /* Charger21_MasterUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BD56F75D26BC6CD50033C18F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BD56F74526BC6CD10033C18F /* Charger21_Master */;
+			targetProxy = BD56F75C26BC6CD50033C18F /* PBXContainerItemProxy */;
+		};
+		BD56F76826BC6CD50033C18F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BD56F74526BC6CD10033C18F /* Charger21_Master */;
+			targetProxy = BD56F76726BC6CD50033C18F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		BD56F75226BC6CD40033C18F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BD56F75326BC6CD40033C18F /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		BD56F76D26BC6CD50033C18F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BD56F76E26BC6CD50033C18F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		BD56F77026BC6CD50033C18F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Charger21_Master/Charger21_Master.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 535FNG3TMM;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Charger21_Master/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "RH.Charger21-Master";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Charger21_Master/Source/Charger21_Master-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		BD56F77126BC6CD50033C18F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Charger21_Master/Charger21_Master.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 535FNG3TMM;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Charger21_Master/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "RH.Charger21-Master";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Charger21_Master/Source/Charger21_Master-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		BD56F77326BC6CD50033C18F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 535FNG3TMM;
+				INFOPLIST_FILE = Charger21_MasterTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.2;
+				PRODUCT_BUNDLE_IDENTIFIER = "RH.Charger21-MasterTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Charger21_Master.app/Contents/MacOS/Charger21_Master";
+			};
+			name = Debug;
+		};
+		BD56F77426BC6CD50033C18F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 535FNG3TMM;
+				INFOPLIST_FILE = Charger21_MasterTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.2;
+				PRODUCT_BUNDLE_IDENTIFIER = "RH.Charger21-MasterTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Charger21_Master.app/Contents/MacOS/Charger21_Master";
+			};
+			name = Release;
+		};
+		BD56F77626BC6CD50033C18F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 535FNG3TMM;
+				INFOPLIST_FILE = Charger21_MasterUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "RH.Charger21-MasterUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Charger21_Master;
+			};
+			name = Debug;
+		};
+		BD56F77726BC6CD50033C18F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 535FNG3TMM;
+				INFOPLIST_FILE = Charger21_MasterUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "RH.Charger21-MasterUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Charger21_Master;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BD56F74126BC6CD10033C18F /* Build configuration list for PBXProject "Charger21_Master" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD56F76D26BC6CD50033C18F /* Debug */,
+				BD56F76E26BC6CD50033C18F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD56F76F26BC6CD50033C18F /* Build configuration list for PBXNativeTarget "Charger21_Master" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD56F77026BC6CD50033C18F /* Debug */,
+				BD56F77126BC6CD50033C18F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD56F77226BC6CD50033C18F /* Build configuration list for PBXNativeTarget "Charger21_MasterTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD56F77326BC6CD50033C18F /* Debug */,
+				BD56F77426BC6CD50033C18F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD56F77526BC6CD50033C18F /* Build configuration list for PBXNativeTarget "Charger21_MasterUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD56F77626BC6CD50033C18F /* Debug */,
+				BD56F77726BC6CD50033C18F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		BD56F74D26BC6CD10033C18F /* Charger21_Master.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				BD56F74E26BC6CD10033C18F /* Charger21_Master.xcdatamodel */,
+			);
+			currentVersion = BD56F74E26BC6CD10033C18F /* Charger21_Master.xcdatamodel */;
+			path = Charger21_Master.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = BD56F73E26BC6CD10033C18F /* Project object */;
+}
