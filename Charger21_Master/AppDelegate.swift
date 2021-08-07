@@ -19,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
    func applicationWillTerminate(_ aNotification: Notification) {
       // Insert code here to tear down your application
+      print("applicationWillTerminate") 
    }
 
    // MARK: - Core Data stack
@@ -81,6 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
    }
 
    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+      print("applicationShouldTerminate") 
        // Save changes in the application's managed object context before the application terminates.
        let context = persistentContainer.viewContext
        
@@ -122,6 +124,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
        // If we got here, it is time to quit.
        return .terminateNow
    }
+   
+ 
+
 
 }
 

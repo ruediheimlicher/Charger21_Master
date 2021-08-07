@@ -18,7 +18,6 @@
 		BD56F77C26BC6DA70033C18F /* abszisse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F77B26BC6DA70033C18F /* abszisse.swift */; };
 		BD56F78026BC6DF60033C18F /* rVertikalanzeige.m in Sources */ = {isa = PBXBuildFile; fileRef = BD56F77F26BC6DF60033C18F /* rVertikalanzeige.m */; };
 		BD56F78426BC6E070033C18F /* usb.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F78126BC6E070033C18F /* usb.swift */; };
-		BD56F78526BC6E070033C18F /* hid.c in Sources */ = {isa = PBXBuildFile; fileRef = BD56F78226BC6E070033C18F /* hid.c */; };
 		BD56F7D726BD2F030033C18F /* halticon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F79C26BD2F030033C18F /* halticon.psd */; };
 		BD56F7D826BD2F030033C18F /* rewindicon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F79D26BD2F030033C18F /* rewindicon.psd */; };
 		BD56F7D926BD2F030033C18F /* playicon.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F79E26BD2F030033C18F /* playicon.psd */; };
@@ -39,6 +38,10 @@
 		BD56F7F926BD2F030033C18F /* USB.gif in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7C026BD2F030033C18F /* USB.gif */; };
 		BD56F7FC26BD2F030033C18F /* Kreuz.psd in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7C326BD2F030033C18F /* Kreuz.psd */; };
 		BD56F7FD26BD2F030033C18F /* Start PlayImg.cwk in Resources */ = {isa = PBXBuildFile; fileRef = BD56F7C426BD2F030033C18F /* Start PlayImg.cwk */; };
+		BD56F7FF26BD3DC10033C18F /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F7FE26BD3DC10033C18F /* Preferences.swift */; };
+		BD56F80226BD6D380033C18F /* ok_image.png in Resources */ = {isa = PBXBuildFile; fileRef = BD56F80026BD6D380033C18F /* ok_image.png */; };
+		BD56F80326BD6D380033C18F /* notok_image.png in Resources */ = {isa = PBXBuildFile; fileRef = BD56F80126BD6D380033C18F /* notok_image.png */; };
+		BD56F80526BD6E920033C18F /* hid.m in Sources */ = {isa = PBXBuildFile; fileRef = BD56F80426BD6E920033C18F /* hid.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,7 +82,6 @@
 		BD56F77E26BC6DF60033C18F /* Charger21_Master-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Charger21_Master-Bridging-Header.h"; sourceTree = "<group>"; };
 		BD56F77F26BC6DF60033C18F /* rVertikalanzeige.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = rVertikalanzeige.m; sourceTree = SOURCE_ROOT; };
 		BD56F78126BC6E070033C18F /* usb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = usb.swift; sourceTree = SOURCE_ROOT; };
-		BD56F78226BC6E070033C18F /* hid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hid.c; sourceTree = SOURCE_ROOT; };
 		BD56F78326BC6E070033C18F /* hid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hid.h; sourceTree = SOURCE_ROOT; };
 		BD56F79C26BD2F030033C18F /* halticon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = halticon.psd; sourceTree = "<group>"; };
 		BD56F79D26BD2F030033C18F /* rewindicon.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = rewindicon.psd; sourceTree = "<group>"; };
@@ -101,6 +103,10 @@
 		BD56F7C026BD2F030033C18F /* USB.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = USB.gif; sourceTree = "<group>"; };
 		BD56F7C326BD2F030033C18F /* Kreuz.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = Kreuz.psd; sourceTree = "<group>"; };
 		BD56F7C426BD2F030033C18F /* Start PlayImg.cwk */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Start PlayImg.cwk"; sourceTree = "<group>"; };
+		BD56F7FE26BD3DC10033C18F /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
+		BD56F80026BD6D380033C18F /* ok_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ok_image.png; path = Icons/ok_image.png; sourceTree = SOURCE_ROOT; };
+		BD56F80126BD6D380033C18F /* notok_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = notok_image.png; path = Icons/notok_image.png; sourceTree = SOURCE_ROOT; };
+		BD56F80426BD6E920033C18F /* hid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hid.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +137,7 @@
 		BD56F73D26BC6CD10033C18F = {
 			isa = PBXGroup;
 			children = (
+				BD56F7FE26BD3DC10033C18F /* Preferences.swift */,
 				BD56F74826BC6CD10033C18F /* Charger21_Master */,
 				BD56F78826BD2F030033C18F /* Icons */,
 				BD56F75E26BC6CD50033C18F /* Charger21_MasterTests */,
@@ -185,7 +192,7 @@
 		BD56F77826BC6D5D0033C18F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BD56F78226BC6E070033C18F /* hid.c */,
+				BD56F80426BD6E920033C18F /* hid.m */,
 				BD56F78326BC6E070033C18F /* hid.h */,
 				BD56F78126BC6E070033C18F /* usb.swift */,
 				BD56F77F26BC6DF60033C18F /* rVertikalanzeige.m */,
@@ -211,6 +218,8 @@
 		BD56F79A26BD2F030033C18F /* neue Icons */ = {
 			isa = PBXGroup;
 			children = (
+				BD56F80126BD6D380033C18F /* notok_image.png */,
+				BD56F80026BD6D380033C18F /* ok_image.png */,
 				BD56F79C26BD2F030033C18F /* halticon.psd */,
 				BD56F79D26BD2F030033C18F /* rewindicon.psd */,
 				BD56F79E26BD2F030033C18F /* playicon.psd */,
@@ -359,9 +368,11 @@
 				BD56F7F426BD2F030033C18F /* recordicon.gif in Resources */,
 				BD56F7DD26BD2F030033C18F /* playicon_weiss.psd in Resources */,
 				BD56F7DA26BD2F030033C18F /* stopicon.psd in Resources */,
+				BD56F80326BD6D380033C18F /* notok_image.png in Resources */,
 				BD56F7DC26BD2F030033C18F /* recordicon.psd in Resources */,
 				BD56F7F826BD2F030033C18F /* stopicon.gif in Resources */,
 				BD56F7F626BD2F030033C18F /* halticon.gif in Resources */,
+				BD56F80226BD6D380033C18F /* ok_image.png in Resources */,
 				BD56F7F326BD2F030033C18F /* USB_mod.gif in Resources */,
 				BD56F7DF26BD2F030033C18F /* recordicon weiss.psd in Resources */,
 				BD56F7DB26BD2F030033C18F /* gostarticon.psd in Resources */,
@@ -390,14 +401,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BD56F80526BD6E920033C18F /* hid.m in Sources */,
 				BD56F74C26BC6CD10033C18F /* ViewController.swift in Sources */,
 				BD56F74A26BC6CD10033C18F /* AppDelegate.swift in Sources */,
 				BD56F78426BC6E070033C18F /* usb.swift in Sources */,
-				BD56F78526BC6E070033C18F /* hid.c in Sources */,
 				BD56F74F26BC6CD10033C18F /* Charger21_Master.xcdatamodeld in Sources */,
 				BD56F77A26BC6D7C0033C18F /* diagramm.swift in Sources */,
 				BD56F78026BC6DF60033C18F /* rVertikalanzeige.m in Sources */,
 				BD56F77C26BC6DA70033C18F /* abszisse.swift in Sources */,
+				BD56F7FF26BD3DC10033C18F /* Preferences.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -454,7 +466,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -477,11 +489,12 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -495,7 +508,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.2;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -515,7 +528,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -538,11 +551,12 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -550,7 +564,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.2;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;

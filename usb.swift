@@ -25,11 +25,11 @@ open class usb_teensy: NSObject
 {
    var hid_usbstatus: Int32 = 0
    var usb_count: UInt8 = 0
-   //let size = BufferSize()
- //  let size = BUFFER_SIZE
    var read_byteArray = [UInt8](repeating: 0x00, count: BUFFER_SIZE)
    var last_read_byteArray = [UInt8](repeating: 0x00, count: BUFFER_SIZE)
-  /*
+  
+   
+   /*
    char*      sendbuffer;
    sendbuffer=malloc(USB_DATENBREITE);
 */
@@ -58,67 +58,65 @@ open class usb_teensy: NSObject
    
    open func USBOpen()->Int32
    {
-     // var r:Int32 = 0
+      var r:Int32 = 0
       
+      if (hid_usbstatus > 0)
+      {
+         print("func usb_teensy.USBOpen USB schon offen")
+         let alert = NSAlert()
+         alert.messageText = "USB Device"
+         alert.informativeText = "USB ist schon offen"
+         alert.alertStyle = .warning
+         alert.addButton(withTitle: "OK")
+        // alert.addButton(withTitle: "Cancel")
+         let antwort =  alert.runModal() == .alertFirstButtonReturn
+         
+         return 1;
+      }
       let    out = rawhid_open(1, 0x16C0, 0x0480, 0xFFAB, 0x0200)
-      //print("func usb_teensy.USBOpen out: \(out)")
+      print("func usb_teensy.USBOpen out: \(out)")
       
       hid_usbstatus = out as Int32;
       
       if (out <= 0)
       {
-         //NSLog(@"USBOpen: no rawhid device found");
+         NSLog("USBOpen: no rawhid device found");
          //[AVR setUSB_Device_Status:0];
       }
       else
       {
          NSLog("USBOpen: found rawhid device hid_usbstatus: %d",hid_usbstatus)
-         /*
-          let manu   = get_manu()
-          let manustr = UnsafePointer<CUnsignedChar>(manu)
-          if (manustr == nil)
-          {
-          manustring = "-"
-          }
-          else
-          {
-          manustring = String(cString: UnsafePointer<CChar>(manustr!))
-          }
-          */
-         // https://codedump.io/share/77b7p4vSpwaJ/1/converting-from-const-char-to-swift-string
-         let manu   = get_manu()
- //        let l = strlen(manu)
- //        let str1 = String(cString: get_manu())
+         let manu   = get_manu() 
+         let manustr:String = String(cString: manu!)
          
- //        let str2 = String(cString: manu!)
-         //print ("manu l: \(l) \(manu!) str2: \(str2)")
-           
-         
-         
-         /*
-          let prod = get_prod();
-          
-          //fprintf(stderr,"prod: %s\n",prod);
-          let prodstr = UnsafePointer<CUnsignedChar>(prod)
-          if (prodstr == nil)
-          {
-          prodstring = "-"
-          }
-          else
-          {
-          prodstring = String(cString: UnsafePointer<CChar>(prod!))
-          }
-          
-          var USBDatenDic = ["prod": prod, "manu":manu]
-          */
-      
-      
-      let prod = get_prod();
+         if (manustr.isEmpty)
+         {
+            manustring = "-"
+         }
+         else
+         {
+            manustring = manustr //String(cString: UnsafePointer<CChar>(manustr))
+         }
 
-      
-//      var USBDatenDic = ["prod": prod, "manu":manu]
-      
+         let prod = get_prod();
+         
+         //fprintf(stderr,"prod: %s\n",prod);
+         let prodstr:String = String(cString: prod!)
+         
+         //let anyprodstr : Any? = prodstr
+         if (prodstr.isEmpty)
+         {
+            prodstring = "-"
+         }
+         else
+         {
+            prodstring = prodstr //String(cString: UnsafePointer<CChar>(prod!))
+         }
+   //      var USBDatenDic = ["prod": prod, "manu":manu]
+         
       }
+      
+      
       return out;
    } // end USBOpen
    
@@ -417,13 +415,49 @@ open class usb_teensy: NSObject
       return senderfolg
    }
    
+   open func send_USB()->Int32
+   {
+      // http://www.swiftsoda.com/swift-coding/get-bytes-from-nsdata/
+      // Test Array to generate some Test Data
+      //var testData = Data(bytes: UnsafePointer<UInt8>(testArray),count: testArray.count)
+         let senderfolg = rawhid_send(0,&write_byteArray, Int32(BUFFER_SIZE), 50)
+         
+         if hid_usbstatus == 0
+         {
+            //print("hid_usbstatus 0: \(hid_usbstatus)")
+         }
+         else
+         {
+            //print("hid_usbstatus not 0: \(hid_usbstatus)")
+            
+         }
+         
+         return senderfolg
+      
+   }
+
+   open func report_stop_read_USB(_ inTimer: Timer)
+   {
+      read_OK = false
+   }
+
+   open func getlastDataRead()->Data
+   {
+      return lastDataRead
+   }
+
    open func teensy_present()->Bool
    {
       return (usb_present() > 0)
    }
+   
+   open func dev_present()->Int32
+   {
+      return usb_present()
+   }
+ 
 
 } // class
-
 
 
 open class Hello

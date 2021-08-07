@@ -191,12 +191,12 @@ static void free_all_hid(void)
 const char* get_manu()
 {
    hid_t * cnc = get_hid(0);
-   if (cnc)
+   if (cnc) 
    {
       CFTypeRef manu= IOHIDDeviceGetProperty(cnc->ref,CFSTR(kIOHIDManufacturerKey));
       //CFStringRef manu = (CFStringRef)prop;
-      
-      const char* manustr = CFStringGetCStringPtr(manu, kCFStringEncodingMacRoman);
+      CFStringEncoding encoding = CFStringGetSystemEncoding();
+      const char* manustr = CFStringGetCStringPtr(manu, encoding);
       //fprintf(stderr,"manustr: %s\n",manustr);   
       return  manustr; 
    }
@@ -215,9 +215,12 @@ const char* get_prod()
    {
       CFTypeRef prod= IOHIDDeviceGetProperty(cnc->ref,CFSTR(kIOHIDProductKey));
       //CFStringRef manu = (CFStringRef)prop;
-      const char* prodstr = CFStringGetCStringPtr(prod, kCFStringEncodingMacRoman);
+      CFStringEncoding encoding = CFStringGetSystemEncoding();
+      const char* prodstr = CFStringGetCStringPtr(prod, encoding);
+      //kCFStringEncodingMacRoman
       //fprintf(stderr,"prodstr: %s\n",prodstr);
-      
+      if (prodstr == NULL)
+         return "--";
       return  prodstr; 
    }
    else 
@@ -331,8 +334,9 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
    
    kern_return_t           result;
    mach_port_t             masterPort;
-//   CFMutableDictionaryRef  matchingDict = NULL;
+   //CFMutableDictionaryRef  matchingDict = NULL;
    CFRunLoopSourceRef      runLoopSource;
+   fprintf(stderr,"fprintf rawhid_open vid: %d pid: %d\n");
    
    
    //Create a master port for communication with the I/O Kit
@@ -353,63 +357,73 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
    CFMutableDictionaryRef dict;
    CFNumberRef num;
    IOReturn ret;
-	hid_t *p;
-	int count=0;
-   //fprintf(stderr,"fprintf rawhid_open\n");
-	if (first_hid) free_all_hid();
-	//printf("rawhid_open, max=%d\n", max);
+   hid_t *p;
+   int count=0;
+  
+   
+   
+   if (first_hid) free_all_hid();
+   //printf("rawhid_open, max=%d\n", max);
    //fflush (stdout); 
-	if (max < 1) return 0;
+   if (max < 1) return 0;
    // Start the HID Manager
+   if (hid_manager) 
+   {
+      CFRelease(hid_manager);
+      hid_manager = NULL;
+   }
+
    // http://developer.apple.com/technotes/tn2007/tn2187.html
-	if (!hid_manager) {
+   if (!hid_manager)
+   {
       hid_manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-      if (hid_manager == NULL || CFGetTypeID(hid_manager) != IOHIDManagerGetTypeID()) {
+      if (hid_manager == NULL || CFGetTypeID(hid_manager) != IOHIDManagerGetTypeID()) 
+      {
          if (hid_manager) CFRelease(hid_manager);
          return 0;
       }
-	}
-	if (vid > 0 || pid > 0 || usage_page > 0 || usage > 0) {
-		// Tell the HID Manager what type of devices we want
+   }
+   if (vid > 0 || pid > 0 || usage_page > 0 || usage > 0) {
+      // Tell the HID Manager what type of devices we want
       dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
                                        &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
       if (!dict) return 0;
-		if (vid > 0) 
+      if (vid > 0) 
       {
-			num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &vid);
-			CFDictionarySetValue(dict, CFSTR(kIOHIDVendorIDKey), num);
-			CFRelease(num);
-		}
-		if (pid > 0) 
+         num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &vid);
+         CFDictionarySetValue(dict, CFSTR(kIOHIDVendorIDKey), num);
+         CFRelease(num);
+      }
+      if (pid > 0) 
       {
-			num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &pid);
-			CFDictionarySetValue(dict, CFSTR(kIOHIDProductIDKey), num);
-			CFRelease(num);
-		}
-		if (usage_page > 0) 
+         num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &pid);
+         CFDictionarySetValue(dict, CFSTR(kIOHIDProductIDKey), num);
+         CFRelease(num);
+      }
+      if (usage_page > 0) 
       {
-			num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usage_page);
-			CFDictionarySetValue(dict, CFSTR(kIOHIDPrimaryUsagePageKey), num);
-			CFRelease(num);
-		}
-		if (usage > 0) 
+         num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usage_page);
+         CFDictionarySetValue(dict, CFSTR(kIOHIDPrimaryUsagePageKey), num);
+         CFRelease(num);
+      }
+      if (usage > 0) 
       {
-			num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usage);
-			CFDictionarySetValue(dict, CFSTR(kIOHIDPrimaryUsageKey), num);
-			CFRelease(num);
-		}
+         num = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usage);
+         CFDictionarySetValue(dict, CFSTR(kIOHIDPrimaryUsageKey), num);
+         CFRelease(num);
+      }
       IOHIDManagerSetDeviceMatching(hid_manager, dict);
       CFRelease(dict);
-	} 
+   } 
    else 
    {
       IOHIDManagerSetDeviceMatching(hid_manager, NULL);
-	}
-	// set up a callbacks for device attach & detach
+   }
+   // set up a callbacks for device attach & detach
    IOHIDManagerScheduleWithRunLoop(hid_manager, CFRunLoopGetCurrent(),
                                    kCFRunLoopDefaultMode);
    IOHIDManagerRegisterDeviceMatchingCallback(hid_manager, attach_callback, NULL);
-	IOHIDManagerRegisterDeviceRemovalCallback(hid_manager, detach_callback, NULL);
+   IOHIDManagerRegisterDeviceRemovalCallback(hid_manager, detach_callback, NULL);
    ret = IOHIDManagerOpen(hid_manager, kIOHIDOptionsTypeNone);
    if (ret != kIOReturnSuccess) 
    {
@@ -418,15 +432,16 @@ int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
       CFRelease(hid_manager);
       return 0;
    }
-//	printf("run loop\n");
-	// let it do the callback for all devices
-	while (CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true) == kCFRunLoopRunHandledSource) ;
-	// count up how many were added by the callback
-	for (p = first_hid; p; p = p->next) count++;
+//   printf("run loop\n");
+   // let it do the callback for all devices
+   while (CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true) == kCFRunLoopRunHandledSource) ;
+   // count up how many were added by the callback
+   for (p = first_hid; p; p = p->next) count++;
    
    hid_usbstatus=count;
-	return count;
+   return count;
 }
+
 
 void rawhid_close(int num)
 {
