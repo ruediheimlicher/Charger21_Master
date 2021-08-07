@@ -194,10 +194,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let DATACOUNT_HI_BYTE   =   6
 
    //MARK: Charger Konstanten
-   let STROM_L_BYTE  = 8
-   let STROM_H_BYTE  = 9
    
-  
+   let TASK = 16
+   let STROM_A_L_BYTE  = 8
+   let STROM_A_H_BYTE  = 9
+   
+   let STROM_B_L_BYTE  = 10
+   let STROM_B_H_BYTE  = 11
+ 
  
    // Outlets
    // Diagramm
@@ -517,8 +521,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       print("reportStromSlider index: \(sender.intValue)")
       let strom = sender.intValue
       
-      teensy.write_byteArray[STROM_H_BYTE] = UInt8((strom & 0xFF00) >> 8) // hb
-      teensy.write_byteArray[STROM_L_BYTE] = UInt8((strom & 0x00FF) & 0xFF) // lb
+      teensy.write_byteArray[TASK] = 0xA0;
+      teensy.write_byteArray[STROM_A_H_BYTE] = UInt8((strom & 0xFF00) >> 8) // hb
+      teensy.write_byteArray[STROM_A_L_BYTE] = UInt8((strom & 0x00FF) & 0xFF) // lb
 
       var senderfolg = 0
       if (usbstatus > 0)
