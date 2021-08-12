@@ -1348,12 +1348,13 @@ class datadiagramm: NSViewController, NSWindowDelegate
       print("init coder")
       super.init(coder: aDecoder)
    }
-   
+   /*
    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?)
    {
       super.init(nibName: nibNameOrNil, bundle: nil)
       
    }
+ */
    override func viewDidLoad()
    {
       super.viewDidLoad()

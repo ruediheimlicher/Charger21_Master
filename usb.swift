@@ -59,7 +59,7 @@ open class usb_teensy: NSObject
    open func USBOpen()->Int32
    {
       var r:Int32 = 0
-      
+      print("func usb_teensy.USBOpen hid_usbstatus: \(hid_usbstatus)")
       if (hid_usbstatus > 0)
       {
          print("func usb_teensy.USBOpen USB schon offen")
@@ -70,10 +70,12 @@ open class usb_teensy: NSObject
          alert.addButton(withTitle: "OK")
         // alert.addButton(withTitle: "Cancel")
          let antwort =  alert.runModal() == .alertFirstButtonReturn
-         
          return 1;
       }
-      let    out = rawhid_open(1, 0x16C0, 0x0480, 0xFFAB, 0x0200)
+      //int rawhid_open(int max, int vid, int pid, int usage_page, int usage)
+      let    out = rawhid_open(1, 0x16C0, 0x0486, 0xFFAB, 0x0200)
+     
+      
       print("func usb_teensy.USBOpen out: \(out)")
       
       hid_usbstatus = out as Int32;
@@ -86,9 +88,13 @@ open class usb_teensy: NSObject
       else
       {
          NSLog("USBOpen: found rawhid device hid_usbstatus: %d",hid_usbstatus)
-         let manu   = get_manu() 
-         let manustr:String = String(cString: manu!)
-         
+         let manu   = get_manu()
+         var manustr:String = "--"
+         if (manu != nil)
+         {
+            manustr = String(cString: manu!)
+            
+         }
          if (manustr.isEmpty)
          {
             manustring = "-"
@@ -97,22 +103,22 @@ open class usb_teensy: NSObject
          {
             manustring = manustr //String(cString: UnsafePointer<CChar>(manustr))
          }
-
-         let prod = get_prod();
          
+         let prod = get_prod();
          //fprintf(stderr,"prod: %s\n",prod);
          let prodstr:String = String(cString: prod!)
-         
-         //let anyprodstr : Any? = prodstr
-         if (prodstr.isEmpty)
+         // https://stackoverflow.com/questions/40685592/comparing-non-optional-any-to-nil-is-always-false
+         let anyprodstr : Any? = prodstr
+         if (anyprodstr == nil)
+         //if (prodstr != nil)
          {
             prodstring = "-"
          }
          else
          {
-            prodstring = prodstr //String(cString: UnsafePointer<CChar>(prod!))
+            prodstring = String(cString: UnsafePointer<CChar>(prod!))
          }
-   //      var USBDatenDic = ["prod": prod, "manu":manu]
+     //    var USBDatenDic = ["prod": prod, "manu":manu]
          
       }
       
@@ -148,9 +154,9 @@ open class usb_teensy: NSObject
       read_OK = ObjCBool(cont)
       let timerDic:NSMutableDictionary  = ["count": 0]
       
-      let result = rawhid_recv(0, &read_byteArray, Int32(BUFFER_SIZE), 50);
+      let result = rawhid_recv(0, &read_byteArray, Int32(BUFFER_SIZE), 220);
       
-      print("\n*report_start_read_USB result: \(result) cont: \(cont)")
+      print("\n************    report_start_read_USB result: \(result) cont: \(cont)")
       //print("usb.swift start_read_byteArray start: *\n\(read_byteArray)*")
       
       let nc = NotificationCenter.default
@@ -176,12 +182,13 @@ open class usb_teensy: NSObject
       if (read_OK).boolValue
       {
          //var tempbyteArray = [UInt8](count: 32, repeatedValue: 0x00)
+         // https://stackoverflow.com/questions/45415901/simultaneous-accesses-to-0x1c0a7f0f8-but-modification-requires-exclusive-access
          
-         var result = rawhid_recv(0, &read_byteArray, Int32(BUFFER_SIZE), 50)
+         var result = rawhid_recv(0, &read_byteArray, Int32(BUFFER_SIZE), 150)
          
  
-  //        print("*cont_read_USB result: \(result)")
- //         print("tempbyteArray in Timer: *\(read_byteArray)*")
+         print("*cont_read_USB result: \(result) \((String(format:"%02X", read_byteArray[0]))) \((String(format:"%02X", read_byteArray[1]))) \((String(format:"%02X", read_byteArray[2]))) \((String(format:"%02X", read_byteArray[3])))")
+          //print("tempbyteArray in Timer: *\(read_byteArray)*")
          // var timerdic: [String: Int]
          
          /*
@@ -227,6 +234,7 @@ open class usb_teensy: NSObject
          //timer.userInfo["count"] = count+1
          if !(last_read_byteArray == read_byteArray)
          {
+            print(" new read_byteArray in Timer")
             last_read_byteArray = read_byteArray
             new_Data = true
             datatruecounter += 1
@@ -436,14 +444,14 @@ open class usb_teensy: NSObject
       
    }
 
-   open func report_stop_read_USB(_ inTimer: Timer)
+   open func report_stop_read_USB()
    {
       read_OK = false
    }
 
-   open func getlastDataRead()->Data
+   open func getlastDataRead()->[UInt8]
    {
-      return lastDataRead
+      return last_read_byteArray
    }
 
    open func teensy_present()->Bool
