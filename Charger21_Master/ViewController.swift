@@ -98,6 +98,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
    var downloaddatanummer:UInt32 = 0 // Byte 3, 4: counter beim Lesen von mehreren Bloecken
 
+ 
    
    var packetcount :UInt8 = 0 // byte 5: counter fuer pakete beim Lesen eines Blocks 10 * 48 + 32
    var lastpacket :UInt16 = 0 // byte 5: counter fuer pakete beim Lesen eines Blocks 10 * 48 + 32
@@ -109,6 +110,10 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
    var MessungStartzeit = 0
    var MessungStartnummer:Int = 0
+   
+   var messungcounter = 0
+   var blockcounter = 0
+   
    
    var teensycode:UInt8 = 0
    var selectedDevice:String = ""
@@ -328,8 +333,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
     @IBOutlet  var download_sd_block_progress: NSTextField!
     */
    
-   @IBOutlet  weak  var messungcounter: NSTextField!
-   @IBOutlet  weak  var blockcounter: NSTextField!
+   @IBOutlet  weak  var messungcounterFeld: NSTextField!
+   @IBOutlet  weak  var blockcounterFeld: NSTextField!
    
    @IBOutlet  weak  var downloadDataFeld: NSTextView!
 
@@ -788,7 +793,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       {
          senderfolg = Int(teensy.send_USB())
       }
-      print("reportStromSlider senderfolg: \(senderfolg)")
+      StromIndikator.integerValue = Int(strom)
+      //print("reportStromSlider senderfolg: \(senderfolg)")
    }//
 
    
@@ -837,19 +843,21 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          rawdataarray.removeAll()
          messungDataArray.removeAll()
          
-         blockcounter.intValue = 0
+         blockcounterFeld.intValue = 0
+         blockcounter = 0
          devicestatus = 0x01
          masterstatus &= ~(1<<MESSUNG_RUN)
-         messungcounter.intValue = 0
+         messungcounterFeld.intValue = 0
+         messungcounter = 0
          //teensybatt.stringValue = "0"
          inputDataFeldstring = ""
          inputDataFeld.string = inputDataFeldstring
          //print("start_messung start ")
-         blockcounter.intValue = 0
+         blockcounterFeld.intValue = 0
          //TaskListe.reloadData() // TableView
          devicestatus = 0x01
          masterstatus &= ~(1<<MESSUNG_RUN)
-         messungcounter.intValue = 0
+         messungcounterFeld.intValue = 0
          inputDataFeldstring = ""
          inputDataFeld.string = inputDataFeldstring
          //print("start_messung start ")
@@ -937,8 +945,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          DiagrammDataArray.removeAll()
          
-         print("report_start_ladung messungcounter intvalue: \(messungcounter.intValue) messungcounter wird 0")
-         messungcounter.intValue = 0;
+         print("report_start_ladung messungcounterFeld intvalue: \(messungcounterFeld.intValue) messungcounterFeld wird 0")
+         messungcounterFeld.intValue = 0;
          
          
          let paragraphStyle = NSMutableParagraphStyle()
@@ -1296,7 +1304,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       stromM.integerValue = Int(stromMwert)
       let  stromOwert:UInt16 = (UInt16(lastData[U_O_H_BYTE + DATA_START_BYTE])<<8) | UInt16((lastData[U_O_L_BYTE + DATA_START_BYTE]))
       stromO.integerValue = Int(stromOwert)
-      StromIndikator.integerValue = Int(stromMwert)
+      //StromIndikator.integerValue = Int(stromMwert)
       var ii = 0
       while ii < 10
       {
@@ -1327,7 +1335,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          print("\nnewLoggerDataAktion READ_START:teensy.read_byteArray: \(teensy.read_byteArray)")
   //       print("batt: \(teensy.read_byteArray[7])")
   //       let batt = UInt16((teensy.read_byteArray[USB_BATT_BYTE])) * 2
-  //       print("READ_START batt: \(batt) messungcounter: \(teensy.read_byteArray[3])")
+  //       print("READ_START batt: \(batt) messungcounterFeld: \(teensy.read_byteArray[3])")
          print("\nREAD_START: read_byteArray code: ")
  
          for  index in 0..<DATA_START_BYTE
@@ -1358,14 +1366,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    case TEENSY_DATA: // Data vom Teensy
       print("\n\tcode ist TEENSY_DATA")
       print("TEENSY CODE 0-7: ")
-      /*
+      
       //for index in 16...24
       for index in 0..<8 // data
       {
          print("\(teensy.read_byteArray[index])\t", terminator: "")
       }
       print("")
- */
+ 
       print("TEENSY DATA 8-32: ")
       //for index in 16...24
       /*
@@ -1383,25 +1391,38 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       print("")
       let rawdatazeile:[UInt8] = teensy.read_byteArray
       rawdataarray.append(rawdatazeile)
+      
+      // messungcounterFeld
       let counterLO = Int32(teensy.read_byteArray[DATACOUNT_LO_BYTE])
       let counterHI = Int32(teensy.read_byteArray[DATACOUNT_HI_BYTE])
-      let counter = (counterLO ) | ((counterHI )<<8)
-      print("TEENSY_DATA counter: \(counter)")
+      messungcounter = Int((counterLO ) | ((counterHI )<<8))
+      print("TEENSY_DATA counterLO: \(counterLO) counterHI: \(counterHI) messungcounter: \(messungcounter)")
+      messungcounterFeld.integerValue = Int(messungcounter)
+      
+      // blockcounterFeld
+      let blockcounterLO = Int32(teensy.read_byteArray[BLOCKOFFSETLO_BYTE])
+      let blockcounterHI = Int32(teensy.read_byteArray[BLOCKOFFSETHI_BYTE])
+      blockcounter = Int((counterLO ) | ((counterHI )<<8))
+      print("TEENSY_DATA blockcounter: \(blockcounter)")
+      blockcounterFeld.integerValue = Int(blockcounter)
+
+      
+      
       var devicenummer = Int((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0x0F // Device, 1-4
       let datacode = (Int32((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
       devicenummer &= 0x0F
       let wl_callback_status = UInt8(teensy.read_byteArray[2])
       print("wl_callback_status: \(wl_callback_status)")
-      if (messungcounter.intValue != counter)
+      if (messungcounterFeld.intValue != messungcounter)
       {
          
           print("\n $$$$$$$$$$$$$$$$$$$$$ ")
-          print("neue Teensy-Messung Nr: \(counter)")// \t Block: \(blockposition)")
+          print("neue Teensy-Messung Nr: \(messungcounter)")// \t Block: \(blockposition)")
           print(" $$$$$$$$$$$$$$$$$$$$$$$ \n")
           
          devicestatus = 0x01 // teensy ist immer aktiv. Sonst wird inputDatafeld nicht geschrieben (devicestatus == callback_status)
          // String beginnen
-         inputDataFeldstring = messungcounter.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
+         inputDataFeldstring = messungcounterFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
          
       }
 
@@ -1462,7 +1483,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       
       //Index fuer Werte im Diagramm
       var diagrammkanalindex = 1    // index 0 ist ordinate (zeit)                                   // Index des zu speichernden Kanals
-      var tempinputDataFeldstring = messungcounter.stringValue + "\t"  + String(tagsekunde()-MessungStartzeit)
+      var tempinputDataFeldstring = messungcounterFeld.stringValue + "\t"  + String(tagsekunde()-MessungStartzeit)
       var deviceDatastring = ("\(devicenummer) \t")
       let devicedata = swiftArray[Int(devicenummer)]
       
