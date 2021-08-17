@@ -907,18 +907,18 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          teensy.write_byteArray[TAKT_LO_BYTE] = UInt8(integerwahl! & 0x00FF)
          teensy.write_byteArray[TAKT_HI_BYTE] = UInt8((integerwahl! & 0xFF00)>>8)
          
+         /*
          print("report_start_ladung kanalstatus:")
          for  kan in 0..<swiftArray.count
          {
             let kanalindex = KANAL_BYTE
             let kanalstatus:UInt8 = UInt8(swiftArray[kan]["A"]!)!
-           // print("kan: \(kan) kanalstatus: \(kanalstatus)")
+           print("kan: \(kan) kanalstatus: \(kanalstatus)")
             teensy.write_byteArray[KANAL_BYTE + kan] = kanalstatus //kanalauswahl
          }
+         */
          
-         
-         // code setzen
-         teensy.write_byteArray[0] = UInt8(MESSUNG_START)
+        
          teensy.write_byteArray[1] = 0
          if (save_SD == 1)
          {
@@ -942,7 +942,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let startminute = tagminute()
          teensy.write_byteArray[STARTMINUTELO_BYTE] = UInt8(startminute & 0x00FF)
          teensy.write_byteArray[STARTMINUTEHI_BYTE] = UInt8((startminute & 0xFF00)>>8)
-         
+         print ("report_start_ladung write_byteArray")
          printarray(arr:teensy.write_byteArray)
          
          DiagrammDataArray.removeAll()
@@ -995,7 +995,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          self.teensy.write_byteArray[0] = UInt8(MESSUNG_START)
          //Do something
-         
+      
          let readerr = self.teensy.start_read_USB(true)
          if (readerr == 0)
          {
@@ -1028,7 +1028,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          senderfolg = Int(teensy.send_USB())
          
       }
- */
+       */
       else
       {
          
@@ -1383,9 +1383,15 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       //MARK: TEENSY_DATA
       case TEENSY_DATA: // Data vom Teensy
          print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
-         print("\ncode ist TEENSY_DATA")
+         print("\ncode ist TEENSY_DATA masterstatus: \(masterstatus)")
          print("TEENSY CODE 0-7: ")
          
+       
+         
+         let sub = Array(lastData[0...7]) // as [UInt8]
+         printarray(arr: sub)
+         
+         /*
          // for index in 16...24
          for index in 0..<8 // data
          {
@@ -1393,7 +1399,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             print(" \(lastData[index])\t")
          }
          print(" ")
-         
+         */
          //  print("TEENSY DATA 8-32: ")
          //for index in 16...24
          /*
@@ -1657,9 +1663,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       // ****************************************************************************
       // MARK: MESSUNG_START
       // ****************************************************************************
-      case MESSUNG_START:
+      case MESSUNG_START: // Rueckmeldung vom Teensy
          print("\n  **************************************************************************** ")
          print("\ncode ist MESSUNG_START")
+         
+         teensy.clear_bytearray()
+         
          masterstatus |= (1<<MESSUNG_RUN) // Messung lauft
          print("teensy.read_byteArray")
          printarray(arr:teensy.read_byteArray)
