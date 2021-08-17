@@ -466,6 +466,21 @@ open class usb_teensy: NSObject
       return usb_present()
    }
  
+   open func clear_bytearray()
+   {
+      for index in 0..<read_byteArray.count 
+      {
+         read_byteArray[index] = 0
+      }
+      for index in 0..<last_read_byteArray.count 
+      {
+         last_read_byteArray[index] = 0
+      }
+      
+      
+      
+      
+   }
 
 } // class
 

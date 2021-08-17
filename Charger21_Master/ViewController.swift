@@ -470,7 +470,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       //dic["A"] = String(0) // Kanaele Analog
 
       var tempDic = [String:String]()
-      tempDic["on"] = String(0)
+      tempDic["on"] = String(1)
       tempDic["device"] = "abcd" //devicearray[0]
       tempDic["deviceID"] = "0"
       tempDic["description"] = "teensy"
@@ -821,7 +821,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
  // MARK: ***        Start Ladung 
    @IBAction func report_start_ladung(_ sender: NSButton)
    {
+      
       print("start_ladung sender: \(sender.state)") // gibt neuen State an
+     
+      teensy.clear_bytearray()
+      
+     // print("start ladung inputDataFeld.string *\(inputDataFeld.string)*")
+      
+      
       teensy.write_byteArray[TASK_BYTE] = 0xC0; // Start Messung
       
       
@@ -834,7 +841,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       
       
       // Messung starten
-      if (sender.state.rawValue == 1)
+      if (sender.state.rawValue == 1) 
       {
          self.datagraph.DatenArray.removeAll()
          self.datagraph.wertesammlungarray.removeAll()
@@ -877,12 +884,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             }
          }
          
-         
-         
-         
-         
-         
-         
+          
          //         cont_read_check.state = 0;
          for var zeile in teensy.read_byteArray
          {
@@ -910,7 +912,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          {
             let kanalindex = KANAL_BYTE
             let kanalstatus:UInt8 = UInt8(swiftArray[kan]["A"]!)!
-            print("kan: \(kan) kanalstatus: \(kanalstatus)")
+           // print("kan: \(kan) kanalstatus: \(kanalstatus)")
             teensy.write_byteArray[KANAL_BYTE + kan] = kanalstatus //kanalauswahl
          }
          
@@ -952,7 +954,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let paragraphStyle = NSMutableParagraphStyle()
          // print("tabstops A: \(paragraphStyle.tabStops)")
          
-         let tabInterval:CGFloat = 28.0
+         let tabInterval:CGFloat = 64.0
          paragraphStyle.tabStops.removeAll()
          
          for cnt in 0..<32 
@@ -978,6 +980,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          dataScroller.contentView.scroll(startscrollpunkt)
          self.dataScroller.contentView.needsDisplay = true
          
+         print("start_ladung inputDataFeld: \(inputDataFeld.string)")
+         //inputDataFeld.string = ""
+         
          delayWithSeconds(1)
          
          
@@ -995,6 +1000,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          if (readerr == 0)
          {
             print("Fehler in report_start_ladung")
+            NSSound(named: NSSound.Name("Frog"))?.play() 
          }
          else
          {
@@ -1067,7 +1073,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       print("stop_messung") // gibt neuen State an
       //self.datagraph.printwertesammlung()
       
-    //  stop_read_USB(self)
+      teensy.report_stop_read_USB()
    }
   
    
@@ -1075,12 +1081,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    func setSettings()
    {
       print("setSettings")
+      /*
       print("swiftArray")
       for zeile in swiftArray
       {
          print(zeile)
       }
-      teensy.write_byteArray[0] = UInt8(LOGGER_SETTING)
+       */
+      teensy.write_byteArray[0] = UInt8(LOGGER_SETTING) // B0
       //Task lesen
       
       let save_SD = convertFromNSControlStateValue((save_SD_check?.state)!)
@@ -1145,7 +1153,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       {
          NSSound(named: NSSound.Name("Glass"))?.play()         
       }
-      print("setSettings end") 
+      print("setSettings end senderfolg: \(senderfolg)") 
 
    }
    
@@ -1291,15 +1299,27 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       // Update the view, if already loaded.
       }
    }
+   
+   
    //MARK: newLoggerDataAktion
    @objc func newLoggerDataAktion(_ notification:Notification) 
    {
+      inputDataFeld.string = inputDataFeld.string  + "*** "
       tagsec_Feld.integerValue = tagsekunde()
       teensy.new_Data = false
+      let info = notification.userInfo
+      //let ident:String = info?["ident"] as! String  // 
 
-      let lastData = teensy.getlastDataRead()
-      print("lastData: \(String(format:"%02X",lastData[0 + DATA_START_BYTE]))  \(lastData[16 + DATA_START_BYTE])  \(lastData[17 + DATA_START_BYTE])  \(lastData[18 + DATA_START_BYTE]) \(lastData[19 + DATA_START_BYTE])")
+      //let lastData = teensy.getlastDataRead()
+      let lastData = info?["data"] as! [UInt8]
       
+      print("lastData: \(String(format:"%02X",lastData[0]))  \(lastData[16 + DATA_START_BYTE])  \(lastData[17 + DATA_START_BYTE])  \(lastData[18 + DATA_START_BYTE]) \(lastData[19 + DATA_START_BYTE])")
+      taskcode = Int(lastData[0])
+      let taskcodestring = String(taskcode)
+      inputDataFeld.string = inputDataFeld.string  + taskcodestring + " ***\n"
+      //let codestring = int2hex(UInt8(taskcode))
+      print("newLoggerDataAktion lastData taskcode: \(String(format:"%02X",taskcode))")
+    
       let  stromMwert:UInt16 = (UInt16(lastData[U_M_H_BYTE + DATA_START_BYTE])<<8) | UInt16((lastData[U_M_L_BYTE + DATA_START_BYTE]))
       stromM.integerValue = Int(stromMwert)
       let  stromOwert:UInt16 = (UInt16(lastData[U_O_H_BYTE + DATA_START_BYTE])<<8) | UInt16((lastData[U_O_L_BYTE + DATA_START_BYTE]))
@@ -1308,345 +1328,375 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       var ii = 0
       while ii < 10
       {
-         
          //print("ii: \(ii)  wert: \(lastData[ii])\t")
          ii = ii+1
       }
       //(String(format:"%02X",
-      taskcode = Int(lastData[0])
-      //let codestring = int2hex(UInt8(taskcode))
-      print("lastData taskcode: \(String(format:"%02X",taskcode))")
       
       let DIAGRAMMDATA_OFFSET:Int = 4
       
-      
-      
       switch taskcode
       {
+      
       case STROM_SET:
          
-            print("\ncode ist STROM_SET")
+         print("\ncode ist STROM_SET")
          
-      
-      
       case READ_START:
          //MARK: READ_START 
          print("\ncode ist READ_START")
          print("\nnewLoggerDataAktion READ_START:teensy.read_byteArray: \(teensy.read_byteArray)")
-  //       print("batt: \(teensy.read_byteArray[7])")
-  //       let batt = UInt16((teensy.read_byteArray[USB_BATT_BYTE])) * 2
-  //       print("READ_START batt: \(batt) messungcounterFeld: \(teensy.read_byteArray[3])")
+         //       print("batt: \(teensy.read_byteArray[7])")
+         //       let batt = UInt16((teensy.read_byteArray[USB_BATT_BYTE])) * 2
+         //       print("READ_START batt: \(batt) messungcounterFeld: \(teensy.read_byteArray[3])")
          print("\nREAD_START: read_byteArray code: ")
- 
-         for  index in 0..<DATA_START_BYTE
-         {
-            print("\(teensy.read_byteArray[index])", terminator: "\t")
-         }
-         print("")
-         print("\nREAD_START: read_byteArray data: ")
+         /*
+          for  index in 0..<DATA_START_BYTE
+          {
+          print("\(teensy.read_byteArray[index])", terminator: "\t")
+          }
+          print("")
+          */
+         print("\nREAD_START: read_byteArray data ab DATA_START_BYTE \(DATA_START_BYTE)")
          for  index in DATA_START_BYTE..<BUFFER_SIZE
          {
             print("\(teensy.read_byteArray[index])", terminator: "\t")
          }
          print("")
          
-         for zeilenindex in 0..<swiftArray.count
-         {
-            let startdevicebatteriespannung = Float(teensy.read_byteArray[DATA_START_BYTE + zeilenindex]) * 2
-               if startdevicebatteriespannung > 0
-               {
-                  let s = String(format:"%2.02fV", startdevicebatteriespannung/100)
-                  swiftArray[zeilenindex]["batterie"] = String(format:"%2.02fV", startdevicebatteriespannung/100)
-               }
-         }
+         /*
+          for zeilenindex in 0..<swiftArray.count
+          {
+          let startdevicebatteriespannung = Float(teensy.read_byteArray[DATA_START_BYTE + zeilenindex]) * 2
+          if startdevicebatteriespannung > 0
+          {
+          let s = String(format:"%2.02fV", startdevicebatteriespannung/100)
+          swiftArray[zeilenindex]["batterie"] = String(format:"%2.02fV", startdevicebatteriespannung/100)
+          }
+          }
+          */
          cont_read_check.state = convertToNSControlStateValue(0);
+         inputDataFeld.string = ""
+         
          TaskListe.reloadData()
-      
+         
       //MARK: TEENSY_DATA
-   case TEENSY_DATA: // Data vom Teensy
-      print("\n\tcode ist TEENSY_DATA")
-      print("TEENSY CODE 0-7: ")
-      
-      //for index in 16...24
-      for index in 0..<8 // data
-      {
-         print("\(teensy.read_byteArray[index])\t", terminator: "")
-      }
-      print("")
- 
-      print("TEENSY DATA 8-32: ")
-      //for index in 16...24
-      /*
-      // index schreiben
-      for index in 8..<BUFFER_SIZE // data BUFFERSIZE 32
-      {
-         print("\(index)\t", terminator: "")
-      }
-      print("")
-      */
-      for index in 8..<BUFFER_SIZE // data
-      {
-         print("\(teensy.read_byteArray[index])\t", terminator: "")
-      }
-      print("")
-      let rawdatazeile:[UInt8] = teensy.read_byteArray
-      rawdataarray.append(rawdatazeile)
-      
-      // messungcounterFeld
-      let counterLO = Int32(teensy.read_byteArray[DATACOUNT_LO_BYTE])
-      let counterHI = Int32(teensy.read_byteArray[DATACOUNT_HI_BYTE])
-      messungcounter = Int((counterLO ) | ((counterHI )<<8))
-      print("TEENSY_DATA counterLO: \(counterLO) counterHI: \(counterHI) messungcounter: \(messungcounter)")
-      messungcounterFeld.integerValue = Int(messungcounter)
-      
-      // blockcounterFeld
-      let blockcounterLO = Int32(teensy.read_byteArray[BLOCKOFFSETLO_BYTE])
-      let blockcounterHI = Int32(teensy.read_byteArray[BLOCKOFFSETHI_BYTE])
-      blockcounter = Int((counterLO ) | ((counterHI )<<8))
-      print("TEENSY_DATA blockcounter: \(blockcounter)")
-      blockcounterFeld.integerValue = Int(blockcounter)
-
-      
-      
-      var devicenummer = Int((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0x0F // Device, 1-4
-      let datacode = (Int32((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
-      devicenummer &= 0x0F
-      let wl_callback_status = UInt8(teensy.read_byteArray[2])
-      print("wl_callback_status: \(wl_callback_status)")
-      if (messungcounterFeld.intValue != messungcounter)
-      {
+      case TEENSY_DATA: // Data vom Teensy
+         print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
+         print("\ncode ist TEENSY_DATA")
+         print("TEENSY CODE 0-7: ")
          
-          print("\n $$$$$$$$$$$$$$$$$$$$$ ")
-          print("neue Teensy-Messung Nr: \(messungcounter)")// \t Block: \(blockposition)")
-          print(" $$$$$$$$$$$$$$$$$$$$$$$ \n")
-          
-         devicestatus = 0x01 // teensy ist immer aktiv. Sonst wird inputDatafeld nicht geschrieben (devicestatus == callback_status)
-         // String beginnen
-         inputDataFeldstring = messungcounterFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
-         
-      }
-
-  /*    
-      if checkDeviceStatus(callback_status: wl_callback_status)
-      {
-         print("wl_callback_status: TaskListe.reloadData")
-         TaskListe.reloadData()
-         reorderAbszisse()
-
-      }
- */
-      /*
-      let teensybatterie = Int32(teensy.read_byteArray[USB_BATT_BYTE]) // halbe Batteriespannung *100
-      var teensybatteriefloat = Float(teensybatterie) * 2 / 100
-      teensybatt.stringValue = NSString(format:"%.2f", teensybatteriefloat) as String
-      print("teensybatterie: \(teensybatterie) teensybatteriefloat: \(teensybatteriefloat)")      
-      swiftArray[devicenummer]["batterie"] = String(format:"%2.02fV", teensybatteriefloat)
- */
-      TaskListe.reloadData()
-      
-      
-      let analog0LO = UInt16(teensy.read_byteArray[ANALOG0  + DATA_START_BYTE])
-      let analog0HI = UInt16(teensy.read_byteArray [ANALOG0 + 1  + DATA_START_BYTE])
-      let teensy0 = analog0LO | (analog0HI<<8)
-      //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) ")
-      //print("")
-      let teensy0float = Float(teensy0) 
-      let teensy0_norm = teensy0float*0xFF/1023
-//        print(" teensy0: \(teensy0) ")
-      Vertikalbalken.setLevel(Int32(teensy0float*0xFF/1023))
-      //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
-      print("TEENSY_DATA teensy0_norm: \(teensy0_norm)")
-      
-      var temparray:[UInt8] = []
-      for pos in DATA_START_BYTE..<BUFFER_SIZE
-      {
-         temparray.append(teensy.read_byteArray[pos]) // DATA-Bereich schreiben
-      }
-      messungDataArray.append(temparray) //Array der Daten von readbytearray von DATA_START_BYTE an
-      
-      
-      messungfloatarray[0][DIAGRAMMDATA_OFFSET + 0] = teensy0float  // DIAGRAMMDATA_OFFSET 4
-      let tempzeit = tagsekunde()
-      
-      let diff = tempzeit - MessungStartzeit
-      
-      var AnzeigeFaktor:Float = 1.0 // Faktor für y-wert, abhängig von Abszisse-Skala
-      var SortenFaktor:Float = 1.0 // Anzeige in Diagramm durch Sortenfaktor teilen
-      var NullpunktOffset:Int = 0
-      var stellen:Int = 1
-      var tempwerte = [Float] ( repeating: 0.00, count: 9 )     // eine Zeile mit messung-zeit und 8 floats
-      tempwerte[0] = Float(diff) // Abszisse
-      // Array mit werten fuer einen Datensatz im Diagramm
-      var werteArray = [[Float]](repeating: [0.0,0.0,1.0,0.0], count: 9 ) // Data mit wert, deviceID, sortenfaktor anzeigefaktor
-      
-      werteArray[0] = [Float(tempzeit),1.0,1.0,1.0] // Abszisse
-      
-      //Index fuer Werte im Diagramm
-      var diagrammkanalindex = 1    // index 0 ist ordinate (zeit)                                   // Index des zu speichernden Kanals
-      var tempinputDataFeldstring = messungcounterFeld.stringValue + "\t"  + String(tagsekunde()-MessungStartzeit)
-      var deviceDatastring = ("\(devicenummer) \t")
-      let devicedata = swiftArray[Int(devicenummer)]
-      
-      //print("devicedata: \(devicedata)")
-      if (devicedata["on"] == "1") // device vorhanden
-      {
-         //devicestatus |= (1<<UInt8(device))
-         
-         let analog = UInt8(devicedata["A"]!)! // code fuer tasten des SegmentedControl
-         
-         // Zeile der Daten aus teensy
-         //              let messungfloatzeilenarray:[Float] = messungfloatarray[device]
-         //              print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
-         
-         let devicecode = UInt8(devicenummer)
-         
-         let deviceID = Int(devicearray.index(of:devicedata["device"]!)!)
-         //var wert_norm:Float = 0
-         //          tempinputDataFeldstring = tempinputDataFeldstring + String(deviceID) + "\t"
-         
-         let messungfloatzeilenarray:[Float] = messungfloatarray[Int(devicenummer)]                                 // Array mit float-daten des device
-         //print("device: \(deviceID)   messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
-         //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
-         
-         // Kanaele des device abfragen
-         for kanal in 0..<4
+         // for index in 16...24
+         for index in 0..<8 // data
          {
-            SortenFaktor = 1
-            AnzeigeFaktor = 1.0
-            stellen = 1
-            let kanalint = UInt8(kanal)
-            if ((analog & (1<<kanalint) > 0) ) // kanal aktiv
-            {
-               /*
-                let messungfloatzeilenarray:[Float] = messungfloatarray[device]  // Array mit float-daten des device
-                print("device: \(deviceID) kanal: \(kanal)  messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
-                //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
-                */
-               let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET] // 4
-               //print("kanal: \t\(kanal) \twert raw: \t\(wert)")
-               var wert_norm:Float = wert
-               
-               switch deviceID
-               {
-               case 0: // teensy
-                  //print("switch  teensy deviceID : \(deviceID) kanal: \(kanal)")
-                  break
-               case 1:
-                  //let ordinateMajorTeileY = dataAbszisse_Temperatur.AbszisseVorgaben.MajorTeileY
-                  //let ordinateNullpunkt = dataAbszisse_Temperatur.AbszisseVorgaben.Nullpunkt
-                  //print("switch  temp deviceID : \(deviceID) kanal: \(kanal)")
-                  switch kanal
-                  {
-                  case 0: // LM35
-                     wert_norm = wert / 10.0 // LM-Wert kommt mit Faktor 10
-                     
-                  case 1: // KTY
-                     wert_norm = wert // KTY_FAKTOR
-                  case 2: // PT100
-                     wert_norm = wert
-                  case 3: // aux
-                     wert_norm = wert
-                     
-                  default: break
-                  }// swicht kanal
-                  
-                  
-                  break // THERMOMETER
-                  
-               case 2:  // ADC12BIT
-                  
-                  //print("switch  ADC deviceID : \(deviceID) kanal: \(kanal)")
-                  
-                  //let ordinateMajorTeileY = dataAbszisse_Volt.AbszisseVorgaben.MajorTeileY
-                  
-                  //let ordinateNullpunkt = dataAbszisse_Volt.AbszisseVorgaben.Nullpunkt
-                  
-                  stellen = 2
-                  if (kanal == 0 || kanal == 2) // 8V, geteilt durch 2
-                  {
-                     //print("kanal 0,2")
-                     wert_norm = wert / 0x1000 * 4.096 * 20
-                     AnzeigeFaktor = 2.0 // Anzeige strecken
-                     SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
-                     if (kanal == 2)
-                     {
-                        //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
-                     }
-                     
-                  }
-                  if (kanal == 1 || kanal == 3)// 16V, geteilt durch 4
-                  {
-                     //print("kanal 1,3")
-                     wert_norm = wert / 0x1000 * 4.096 * 40
-                     SortenFaktor = 10 
-                  }
-               //print("wert_norm: \(wert_norm)")
-               default: 
-                  
-                  break
-               }// switch device
-               //print("\t\twert_norm: \t\(wert_norm)")
-               tempwerte[diagrammkanalindex] = wert_norm
-               werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
-               
-               // Zeile im Textfeld als string aufbauen
-               let stellenstring = "%.0\(stellen)f"
-               tempinputDataFeldstring = tempinputDataFeldstring + "\t" +  String(format:"%.\(stellen)f", wert_norm) // Eintrag in inputDataFeld
-               //let formatstring = "%.\(stellen)f" as NSString
-               // let str = String(format:"%d, %f, %ld", INT_VALUE, FLOAT_VALUE, DOUBLE_VALUE)
-               //tempinputDataFeldstring = tempinputDataFeldstring + "\t" + (NSString(format:formatstring, wert_norm) as String)
-               
-               deviceDatastring = deviceDatastring  + "\t" +  String(format:"%.\(stellen)f", wert_norm)  
-               diagrammkanalindex += 1
-               //print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
-               
-            } // if (analog & (1<<kanalint) > 0)
-            
-         } // for kanal
-         
-         //inputDataFeld.string = inputDataFeld.string! + String(messungnummer) +    tempinputDataFeldstring + "\t"
-         //print("TEENSY werteArray: ")
-         for zeile in werteArray
-         {
-            //print("\(zeile)")
+            //print(" \(teensy.read_byteArray[index])\t")
+            print(" \(lastData[index])\t")
          }
-          TaskListe.reloadData()
-      }
-      
-
-
-         case 0xD0:
+         print(" ")
+         
+         //  print("TEENSY DATA 8-32: ")
+         //for index in 16...24
+         /*
+          // index schreiben
+          for index in 8..<BUFFER_SIZE // data BUFFERSIZE 32
+          {
+          print("\(index)\t", terminator: "")
+          }
+          print("")
+          */
+         //     for index in 8..<BUFFER_SIZE // data
+         //   {
+         //       print("\(teensy.read_byteArray[index])\t", terminator: "")
+         //    }
+         //    print("")
+         let rawdatazeile:[UInt8] = teensy.read_byteArray
+         rawdataarray.append(rawdatazeile)
+         
+         // messungcounterFeld
+         let counterLO = Int32(teensy.read_byteArray[DATACOUNT_LO_BYTE])
+         let counterHI = Int32(teensy.read_byteArray[DATACOUNT_HI_BYTE])
+         messungcounter = Int((counterLO ) | ((counterHI )<<8))
+         //    print("TEENSY_DATA neuer counterwert counterLO: \(counterLO) counterHI: \(counterHI) messungcounter: \(messungcounter)")
+         print("TEENSY_DATA neuer messungcounter: \(messungcounter)")
+         
+         
+         // blockcounterFeld
+         let blockcounterLO = Int32(teensy.read_byteArray[BLOCKOFFSETLO_BYTE])
+         let blockcounterHI = Int32(teensy.read_byteArray[BLOCKOFFSETHI_BYTE])
+         blockcounter = Int((counterLO ) | ((counterHI )<<8)) // neuer wert
+         print("TEENSY_DATA blockcounter: \(blockcounter)")
+         
+         
+         
+         
+         var devicenummer = Int((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0x0F // Device, 1-4
+         let datacode = (Int32((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
+         devicenummer &= 0x0F
+         let wl_callback_status = UInt8(teensy.read_byteArray[2])
+         //print("wl_callback_status: \(wl_callback_status)")
+         if (messungcounterFeld.intValue == 0) // erste Messung von TEENSY
+         {
+            print("\n +++++++++++++++++++++++ ")
+            print("erste Teensy-Messung ")// \t Block: \(blockposition)")
+            print(" +++++++++++++++++++++++ \n")
+            let firstdata = U8ArrayToIntString(arr: lastData)
+            print("firstdata: \(firstdata)")
+         }
+         if (messungcounterFeld.intValue != messungcounter)
+         {
             
-            print("D0 lastData:\n \(lastData[U_M_L_BYTE])  \(lastData[U_M_H_BYTE])  \(lastData[U_O_L_BYTE])  \(lastData[U_O_H_BYTE])   ")
+            print("\n $$$$$$$$$$$$$$$$$$$$$ ")
+            print("neue Teensy-Messung Nr: \(messungcounter)")// \t Block: \(blockposition)")
+            print(" $$$$$$$$$$$$$$$$$$$$$$$ \n")
+            let contdata = U8ArrayToIntString(arr: lastData)
+            print("contdata: \(contdata)")
+           
+            messungcounterFeld.integerValue = Int(messungcounter)
+            
+            devicestatus = 0x01 // teensy ist immer aktiv. Sonst wird inputDatafeld nicht geschrieben (devicestatus == callback_status)
+            // String beginnen
+            //      inputDataFeldstring = messungcounterFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
+            
+            blockcounterFeld.integerValue = Int(blockcounter)
+         }
+         
+         /*    
+          if checkDeviceStatus(callback_status: wl_callback_status)
+          {
+          print("wl_callback_status: TaskListe.reloadData")
+          TaskListe.reloadData()
+          reorderAbszisse()
+          
+          }
+          */
+         /*
+          let teensybatterie = Int32(teensy.read_byteArray[USB_BATT_BYTE]) // halbe Batteriespannung *100
+          var teensybatteriefloat = Float(teensybatterie) * 2 / 100
+          teensybatt.stringValue = NSString(format:"%.2f", teensybatteriefloat) as String
+          print("teensybatterie: \(teensybatterie) teensybatteriefloat: \(teensybatteriefloat)")      
+          swiftArray[devicenummer]["batterie"] = String(format:"%2.02fV", teensybatteriefloat)
+          */
+         TaskListe.reloadData()
+         
+         
+         //   let analog0LO = UInt16(teensy.read_byteArray[ANALOG0  + DATA_START_BYTE])
+         //   let analog0HI = UInt16(teensy.read_byteArray [ANALOG0 + 1  + DATA_START_BYTE])
+         
+         
+         // TODO
+         let analog0LO = UInt16(teensy.read_byteArray[U_M_L_BYTE  + DATA_START_BYTE])
+         let analog0HI = UInt16(teensy.read_byteArray [U_M_L_BYTE + 1  + DATA_START_BYTE])
+         
+         
+         let teensy0 = analog0LO | (analog0HI<<8)
+         
+         //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) ")
+         //print("")
+         let teensy0float = Float(teensy0) 
+         let teensy0_norm = teensy0float*0xFF/1023
+         //        print(" teensy0: \(teensy0) ")
+         Vertikalbalken.setLevel(Int32(teensy0float*0xFF/1023))
+         //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
+         print("TEENSY_DATA teensy0_norm: \(teensy0_norm)")
+         
+         var temparray:[UInt8] = []
+         for pos in DATA_START_BYTE..<BUFFER_SIZE
+         {
+            temparray.append(teensy.read_byteArray[pos]) // DATA-Bereich schreiben
+         }
+         messungDataArray.append(temparray) //Array der Daten von readbytearray von DATA_START_BYTE an
+         
+         
+         messungfloatarray[0][DIAGRAMMDATA_OFFSET + 0] = teensy0float  // DIAGRAMMDATA_OFFSET 4
+         let tempzeit = tagsekunde()
+         
+         let diff = tempzeit - MessungStartzeit
+         
+         var AnzeigeFaktor:Float = 1.0 // Faktor für y-wert, abhängig von Abszisse-Skala
+         var SortenFaktor:Float = 1.0 // Anzeige in Diagramm durch Sortenfaktor teilen
+         var NullpunktOffset:Int = 0
+         var stellen:Int = 1
+         var tempwerte = [Float] ( repeating: 0.00, count: 9 )     // eine Zeile mit messung-zeit und 8 floats
+         tempwerte[0] = Float(diff) // Abszisse
+         // Array mit werten fuer einen Datensatz im Diagramm
+         var werteArray = [[Float]](repeating: [0.0,0.0,1.0,0.0], count: 9 ) // Data mit wert, deviceID, sortenfaktor anzeigefaktor
+         
+         werteArray[0] = [Float(tempzeit),1.0,1.0,1.0] // Abszisse
+         
+         //Index fuer Werte im Diagramm
+         var diagrammkanalindex = 1    // index 0 ist ordinate (zeit)                                   // Index des zu speichernden Kanals
+         var tempinputDataFeldstring = messungcounterFeld.stringValue + "\t delta: "  + String(tagsekunde()-MessungStartzeit) + "\t"
+         var deviceDatastring = ("\(devicenummer) \t")
+         let devicedata = swiftArray[Int(devicenummer)]
+         
+         //     print("devicedata: \(devicedata)")
+         if (devicedata["on"] == "1") // device vorhanden
+         {
+            let analog = UInt8(devicedata["A"]!)! // code fuer tasten des SegmentedControl
+            
+            // Zeile der Daten aus teensy
+            //              let messungfloatzeilenarray:[Float] = messungfloatarray[device]
+            //              print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
+            
+            let devicecode = UInt8(devicenummer)
+            
+            let deviceID = Int(devicearray.index(of:devicedata["device"]!)!)
+            
+            let messungfloatzeilenarray:[Float] = messungfloatarray[Int(devicenummer)]                                 // Array mit float-daten des device
+            //print("device: \(deviceID)   messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
+            //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
+            
+            // Kanaele des device abfragen
+            for kanal in 0..<4
+            {
+               SortenFaktor = 1
+               AnzeigeFaktor = 1.0
+               stellen = 1
+               let kanalint = UInt8(kanal)
+               if ((analog & (1<<kanalint) > 0) ) // kanal aktiv
+               {
+                  /*
+                   let messungfloatzeilenarray:[Float] = messungfloatarray[device]  // Array mit float-daten des device
+                   print("device: \(deviceID) kanal: \(kanal)  messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
+                   //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
+                   */
+                  let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET] // 4
+                  print("kanal: \t\(kanal) \twert raw: \t\(wert)")
+                  var wert_norm:Float = wert
+                  
+                  switch deviceID
+                  {
+                  case 0: // teensy
+                     //print("switch  teensy deviceID : \(deviceID) kanal: \(kanal)")
+                     break
+                  case 1:
+                     //let ordinateMajorTeileY = dataAbszisse_Temperatur.AbszisseVorgaben.MajorTeileY
+                     //let ordinateNullpunkt = dataAbszisse_Temperatur.AbszisseVorgaben.Nullpunkt
+                     //print("switch  temp deviceID : \(deviceID) kanal: \(kanal)")
+                     switch kanal
+                     {
+                     case 0: // LM35
+                        wert_norm = wert / 10.0 // LM-Wert kommt mit Faktor 10
+                     
+                     case 1: // KTY
+                        wert_norm = wert // KTY_FAKTOR
+                     case 2: // PT100
+                        wert_norm = wert
+                     case 3: // aux
+                        wert_norm = wert
+                        
+                     default: break
+                     }// swicht kanal
+                     
+                     
+                     break // THERMOMETER
+                  
+                  case 2:  // ADC12BIT
+                     
+                     //print("switch  ADC deviceID : \(deviceID) kanal: \(kanal)")
+                     
+                     //let ordinateMajorTeileY = dataAbszisse_Volt.AbszisseVorgaben.MajorTeileY
+                     
+                     //let ordinateNullpunkt = dataAbszisse_Volt.AbszisseVorgaben.Nullpunkt
+                     
+                     stellen = 2
+                     if (kanal == 0 || kanal == 2) // 8V, geteilt durch 2
+                     {
+                        //print("kanal 0,2")
+                        wert_norm = wert / 0x1000 * 4.096 * 20
+                        AnzeigeFaktor = 2.0 // Anzeige strecken
+                        SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
+                        if (kanal == 2)
+                        {
+                           //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
+                        }
+                        
+                     }
+                     if (kanal == 1 || kanal == 3)// 16V, geteilt durch 4
+                     {
+                        //print("kanal 1,3")
+                        wert_norm = wert / 0x1000 * 4.096 * 40
+                        SortenFaktor = 10 
+                     }
+                  //print("wert_norm: \(wert_norm)")
+                  default: 
+                     
+                     break
+                  }// switch device
+                  
+                  //print("\t\twert_norm: \t\(wert_norm)")
+                  tempwerte[diagrammkanalindex] = wert_norm
+                  werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
+                  
+                  // Zeile im Textfeld als string aufbauen
+                  let stellenstring = "%.0\(stellen)f"
+                  tempinputDataFeldstring = tempinputDataFeldstring + "\t" +  String(format:"%.\(stellen)f", wert_norm) // Eintrag in inputDataFeld
+                  //let formatstring = "%.\(stellen)f" as NSString
+                  // let str = String(format:"%d, %f, %ld", INT_VALUE, FLOAT_VALUE, DOUBLE_VALUE)
+                  //tempinputDataFeldstring = tempinputDataFeldstring + "\t" + (NSString(format:formatstring, wert_norm) as String)
+                  
+                  deviceDatastring = deviceDatastring  + "\t"  +  String(format:"%.\(stellen)f", wert_norm) 
+                  diagrammkanalindex += 1
+                  //print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
+                  print("deviceDatastring A: \(deviceDatastring)")
+                  print("tempinputDataFeldstring A: \(tempinputDataFeldstring)")
+               } // if (analog & (1<<kanalint) > 0)
+               
+            } // for kanal
+            
+            inputDataFeld.string = inputDataFeld.string   +     tempinputDataFeldstring + "\n"
+            print("TEENSY werteArray: ")
+            for zeile in werteArray
+            {
+               print("\(zeile)")
+            }
+            print("")
+            TaskListe.reloadData()
+         }
+         
+      // ****************************************************************************
+      // MARK: MESSUNG_START
+      // ****************************************************************************
+      case MESSUNG_START:
+         print("\n  **************************************************************************** ")
+         print("\ncode ist MESSUNG_START")
+         masterstatus |= (1<<MESSUNG_RUN) // Messung lauft
+         print("teensy.read_byteArray")
+         printarray(arr:teensy.read_byteArray)
+         //print("\t\(teensy.read_byteArray)")
+         blockcounterFeld.intValue = 0
+         //print("counter Messung start: \(messungcounter.intValue) messungcounter wird 0")
+         messungcounterFeld.intValue = 0
+         print("\nend MESSUNG_START\n")
+         
+         
+      case 0xD0:
+         
+         print("D0 lastData:\n \(lastData[U_M_L_BYTE])  \(lastData[U_M_H_BYTE])  \(lastData[U_O_L_BYTE])  \(lastData[U_O_H_BYTE])   ")
          break;
          
-         default:
+      default:
          break
-      }
+      }// switch
       
-      return;
+      //return;
       let u = ((Int32(lastData[1])<<8) + Int32(lastData[2]))
       //print("hb: \(lastData[1]) lb: \(lastData[2]) u: \(u)")
-      let info = notification.userInfo
+  //    let info = notification.userInfo
       
       //print("info: \(String(describing: info))")
       //print("new Data")
-      let data = notification.userInfo?["data"] as! [UInt8]
+ //     let data = notification.userInfo?["data"] as! [UInt8]
       //print("data: \(String(describing: data)) \n") // data: Optional([0, 9, 51, 0,....
       
       
       //print("lastDataRead: \(lastDataRead)   ")
-      var i = 0
-      while i < 10
-      {
-//         print("i: \(i)  wert: \(lastDataRead[i])\t")
-         i = i+1
-      }
-      var emitter = UInt16(data[13]) << 8  | UInt16(data[12])
+      var emitter = UInt16(lastDataRead[13]) << 8  | UInt16(lastDataRead[12])
       
-         print("emitteradresse: \(lastDataRead[10]) emitterwerte: \(lastDataRead[12]) \(lastDataRead[13]) emitter: \(emitter)")
+  //       print("emitteradresse: \(lastDataRead[10]) emitterwerte: \(lastDataRead[12]) \(lastDataRead[13]) emitter: \(emitter)")
       //emitterFeld.integerValue = Int(emitter)
-      if let d = notification.userInfo!["usbdata"]
+      /*
+      if let d = (notification.userInfo!["usbdata"] as! [UInt8])
       {
             
          //print("d: \(d)\n") // d: [0, 9, 56, 0, 0,... 
@@ -1656,7 +1706,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          //print("element: \(d[1])\n")
          
   //       print("d as string: \(String(describing: d))\n")
-         if d != nil
+         if !(d.isEmpty)
          {
             //print("d not nil\n")
             var i = 0
@@ -1671,6 +1721,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          //print("dic end\n")
       }
+ */
       
       //let dic = notification.userInfo as? [String:[UInt8]]
       //print("dic: \(dic ?? ["a":[123]])\n")
