@@ -306,6 +306,7 @@ class DataPlot: NSView
  
    open func setWerteArray(werteArray:[Float])
    {
+      Swift.print("setWerteArray \(werteArray)")
       //     Swift.print("")
       let AnzeigeFaktor:CGFloat = 1.0//= maxSortenwert/maxAnzeigewert;
       let SortenFaktor:CGFloat = 1.0
@@ -423,6 +424,7 @@ class DataPlot: NSView
    
    open func setWerteArray(werteArray:[Float],  anzeigefaktor:Float, nullpunktoffset:Int)
    {
+      //Swift.print("setWerteArray 2 \(werteArray)")
       //     Swift.print("")
       let AnzeigeFaktor:CGFloat = CGFloat(anzeigefaktor) //= maxSortenwert/maxAnzeigewert;
       let SortenFaktor:CGFloat = 1.0
@@ -539,7 +541,7 @@ class DataPlot: NSView
    open func setWerteArray(werteArray:[[Float]], nullpunktoffset:Int)
    {
       
-      //Swift.print("\ndiagramm  werteArray:\t \(werteArray)")
+ //     Swift.print("\ndiagramm  werteArray:\t \(werteArray)")
  //     for zeile in werteArray
  //     {
         // Swift.print("*\(zeile)*");
@@ -592,11 +594,11 @@ class DataPlot: NSView
             //   Swift.print("i: \(i) werteArray: \(werteArray)")
             // werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
             AnzeigeFaktor = CGFloat(werteArray[i+1][3])
-            
+        //    Swift.print("i: \(i) AnzeigeFaktor: \(AnzeigeFaktor)")
             if (Int(AnzeigeFaktor) > 0)
             {
                neuerPunkt.y = feld.origin.y
-               //            Swift.print("i: \(i) werteArray 0: \(werteArray[0]) neuerPunkt.x nach: \(neuerPunkt.x)")
+              // Swift.print("i: \(i) werteArray 0: \(werteArray[0]) neuerPunkt.x nach: \(neuerPunkt.x) neuerPunkt.y: \(neuerPunkt.y)")
                
                let InputZahl = CGFloat(werteArray[i+1][0])	// Input vom teensy, 0-255. Wert an 0 ist abszisse
                
@@ -632,7 +634,7 @@ class DataPlot: NSView
                neuerPunkt.y = neuerPunkt.y + DiagrammWert;
                
                tempKanalDatenDic["np\(i)"] = neuerPunkt.y // ordinate mit key np1, np2 ...
-               //Swift.print("i: \t\(i)\t device: \t \(deviceID) \tneuerPunkt.x: \t\(neuerPunkt.x)  \tneuerPunkt.y: \t\(neuerPunkt.y)")
+  //             Swift.print("i: \t\(i)\t device: \t \(deviceID) \tneuerPunkt.x: \t\(neuerPunkt.x)  \tneuerPunkt.y: \t\(neuerPunkt.y)")
                //neuerPunkt.y=InputZahl;
                //NSLog(@"setWerteArray: Kanal: %d MinY: %2.2F FaktorY: %2.2f",i,MinY, FaktorY);
                
@@ -658,7 +660,7 @@ class DataPlot: NSView
                
                if (GraphArray[i].isEmpty) // letzter Punkt ist leer, Anfang eines neuen Linienabschnitts
                {
-                  //Swift.print("GraphArray  von \(i) ist noch Empty")
+//                  Swift.print("GraphArray  von \(i) ist noch Empty")
                   //neuerPunkt.x = Vorgaben.DiagrammEcke.x
                   
                   GraphArray[i].move(to: neuerPunkt)
@@ -673,7 +675,7 @@ class DataPlot: NSView
                   GraphArray[i].move(to:currentpoint)
                   
                   GraphArray[i].addLine(to:neuerPunkt)
-                  //Swift.print("GraphArray  deviceID: \t \(deviceID)\t i: \t \(i) \t cp.x: \t\(currentpoint.x)\t \t cp.y: \t\(currentpoint.y)\t np.x: \t\(neuerPunkt.x)\t np.y: \t\(neuerPunkt.y)")
+ //                 Swift.print("GraphArray  deviceID: \t \(deviceID)\t i: \t \(i) \t cp.x: \t\(currentpoint.x)\t \t cp.y: \t\(currentpoint.y)\t np.x: \t\(neuerPunkt.x)\t np.y: \t\(neuerPunkt.y)")
                }
             } // if Anzeigefaktor
          }// if Kanal

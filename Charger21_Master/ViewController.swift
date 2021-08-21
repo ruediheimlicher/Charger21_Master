@@ -492,11 +492,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       tempDic["A"] = String(3) // Bits fuer Kanaele Analog
       tempDic["bereich"] = "0-1V\t0-5V\t0-12V"
       tempDic["analog"] = "3"
-      tempDic["bereichwahl"] = "0"
+      tempDic["bereichwahl"] = "1"
       tempDic["temperatur"] = "16.5°"
       tempDic["batterie"] = "1.0V"
       tempDic["stellen"] = "1"
-      tempDic["majorteiley"] = "8"
+      tempDic["majorteiley"] = "5"
       tempDic["minorteiley"] = "2"
 //      print("tempDic: \(tempDic)")
       
@@ -807,7 +807,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          senderfolg = Int(teensy.send_USB())
       }
       StromIndikator.integerValue = Int(strom)
-      //print("reportStromSlider senderfolg: \(senderfolg)")
+      print("reportStromSlider senderfolg: \(senderfolg)")
    }//
 
    
@@ -1443,7 +1443,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             print(" neue Teensy-Messung Nr: \(messungnummer)  blockcounter: \(blockcounter)")// \t Block: \(blockposition)")
             print(" $$$$$$$$$$$$$$$$$$$$$$$ \n")
             let contdata = U8ArrayToIntString(arr: lastData)
-            print("contdata: \(contdata)")
+    //        print("contdata: \(contdata)")
            
             messungnummerFeld.integerValue = Int(messungnummer)
             
@@ -1455,7 +1455,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          }
          //MARK: von MESSUNG_DATA
             // von MESSUNG_DATA
-            print("messungnummer: \(messungnummer)\tdevicenummer: \(devicenummer)")
+    //        print("messungnummer: \(messungnummer)\tdevicenummer: \(devicenummer)")
            // print("rawdatazeile read_byteArray. Data ab byte 0")
          rawdataarray.append(rawdatazeile)
          
@@ -1465,7 +1465,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             counterLO = Int32(teensy.read_byteArray[DATACOUNT_LO_BYTE])
             counterHI = Int32(teensy.read_byteArray[DATACOUNT_HI_BYTE])
             counter = (counterLO ) | ((counterHI )<<8)
-            print("counter: \(counter)")
+    //        print("counter: \(counter)")
          }
          devicenummer &= 0x0F
          // status der  device checken
@@ -1476,7 +1476,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          for devicelinie in swiftArray
          {
             //var zeile = devicelinie
-            print("deviceindex: \(deviceindex) ")
+  //          print("deviceindex: \(deviceindex) ")
            // print("deviceindex: \(deviceindex) devicelinie: \(devicelinie)") 
             let device = devicelinie["device"]!
             let analog = devicelinie["A"]! // Tastenstatus Kanaele           
@@ -1534,10 +1534,13 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          //print("")
          let U_M_float = Float(U_M) 
-         let U_M_norm = U_M_float*0xFF/1023 // Normiert auf 0xFF
-         Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
+         //let U_M_norm = U_M_float*0xFF/1023 // Normiert auf 0xFF
+         let U_M_norm = U_M_float/1023
+     //    Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
+        
+         
          //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
-         print("TEENSY_DATA U_M: \(U_M) U_M_float: \(U_M_float) U_M_norm: \(U_M_norm)")
+//         print("TEENSY_DATA U_M: \(U_M) U_M_float: \(U_M_float) U_M_norm: \(U_M_norm)")
          
          let U_O_LO = UInt16(teensy.read_byteArray[U_O_L_BYTE  + DATA_START_BYTE])
          let U_O_HI = UInt16(teensy.read_byteArray [U_O_L_BYTE + 1  + DATA_START_BYTE])
@@ -1547,7 +1550,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let U_O_norm = U_O_float*0xFF/1023 // Normiert auf 0xFF
          //Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
          //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
-         print("TEENSY_DATA O_M: \(U_O) O_O_float: \(U_O_float) U_O_norm: \(U_O_norm)")
+//         print("TEENSY_DATA O_M: \(U_O) O_O_float: \(U_O_float) U_O_norm: \(U_O_norm)")
  
          
          var temparray:[UInt8] = []
@@ -1574,8 +1577,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          tempwerte[0] = Float(diff) // Abszisse
          // Array mit werten fuer einen Datensatz im Diagramm
          var werteArray = [[Float]](repeating: [0.0,0.0,1.0,0.0], count: 9 ) // Data mit wert, deviceID, sortenfaktor anzeigefaktor
-         
-         werteArray[0] = [Float(tempzeit),1.0,1.0,1.0] // Abszisse
+         // wertearray: [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
+         werteArray[0] = [Float(tempzeit),1.0,1.0,1.0] // Abszisse 
          
          //Index fuer Werte im Diagramm
          var diagrammkanalindex = 1    // index 0 ist ordinate (zeit)                                   // Index des zu speichernden Kanals
@@ -1624,6 +1627,34 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                   switch deviceID
                   {
                   case 0: // teensy
+                     switch kanal
+                     {
+                     case 0: // 5V
+                        stellen = 2
+                        if (kanal == 0 || kanal == 2) // 5V, geteilt durch 2
+                        {
+                           //print("kanal 0,2")
+                           wert_norm = wert * 340 / 1024 
+                           AnzeigeFaktor = 1.0 // Anzeige strecken
+                           SortenFaktor = 100 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
+                           if (kanal == 2)
+                           {
+                              //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
+                           }
+                           
+                        }
+                         case 1: // 5V
+                        wert_norm = wert / 10.240 // KTY_FAKTOR
+                     case 2: // PT100
+                        wert_norm = wert
+                     case 3: // aux
+                        wert_norm = wert
+                        
+                     default: break
+                     }// swicht kanal
+
+                     
+                     
                      //print("switch  teensy deviceID : \(deviceID) kanal: \(kanal)")
                      break
                   case 1:
@@ -1702,12 +1733,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             } // for kanal
             
             inputDataFeld.string = inputDataFeld.string   +     tempinputDataFeldstring + "\n"
+            /*
             print("TEENSY werteArray: ")
             for zeile in werteArray
             {
                print("\(zeile)")
             }
             print("")
+            */
             TaskListe.reloadData()
          } //MARK: TEENSY_DATA devicedata == 0n END 
          
