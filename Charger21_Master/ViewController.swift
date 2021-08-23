@@ -26,8 +26,10 @@ let TEENSYVREF:Float = 249.0 // Korrektur von Vref des Teensy: nomineller Wert i
 
 let ADC_FAKTOR:Float = 3.2 // reduktionsfaktor Batterie zu adc
 
-
-
+// Bits fuer DEVICE_BYTE (byte auf 0 gesetzt)
+let SPANNUNG_ID = 0 // Bit fuer Batteriespannung // in Teensy 3,4,5
+let STROM_ID = 1 // Bit fuer Strom
+let TEMP_ID = 2 // Bit fuer Temperatur
 
 func U8ArrayToHexString(arr: [UInt8]) -> String 
 {
@@ -285,7 +287,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    // teensy
    //ADC
 
-   let DEVICE = 0
+   let DEVICE_BYTE = 0
 
    //let CHANNEL = 2
 
@@ -412,7 +414,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
    // Einstellungen
    @IBOutlet  weak  var IntervallPop: NSComboBox!
-   @IBOutlet  weak  var ZeitkompressionPop: NSComboBox!
+   @IBOutlet  weak  var ZeitkompressionPop: NSPopUpButton!
    @IBOutlet  weak  var Channels_Feld: NSTextField!
    
    @IBOutlet  weak  var storeChannels_Feld: NSTextField!
@@ -485,7 +487,10 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
   
       IntervallPop.addItems(withObjectValues:["1","2","5","10","20","30","60","120","180","300"])
       IntervallPop.selectItem(at:0)
- 
+      ZeitkompressionPop.removeAllItems()
+      ZeitkompressionPop.addItems(withTitles:["1.0","0.5","0.2","0.1","0.05","0.01","2","5","10"])
+      ZeitkompressionPop.selectItem(at:0)
+
       let mayorteiley = 5
       
       swiftArray.removeAll()
@@ -507,30 +512,32 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       tempDic["stellen"] = "1"
       tempDic["majorteiley"] = String(mayorteiley) //"5"
       tempDic["minorteiley"] = "2"
+      tempDic["sorte"] = "V"
 //      print("tempDic: \(tempDic)")
       
        
       
       swiftArray.append(tempDic )
 
-      tempDic["on"] = String(0)
+      tempDic["on"] = String(1)
       tempDic["device"] = devicearray[1]
- //     tempDic["deviceID"] = "1"
-      tempDic["description"] = "Temperaturen messen"
+      tempDic["deviceID"] = "1"
+      tempDic["description"] = "Strom messen"
       tempDic["A0"] = String(0)
       tempDic["A1"] = String(1)
       tempDic["A"] = String(7)
       tempDic["analogAtitel"] = "ADC 2\tADC 3\tADC 4\t--"
-      tempDic["bereich"] = "0-80°\t0-160°\t-20-140°"
+      tempDic["bereich"] = "0-500mA\t0-1A\t0-2000mA"
       tempDic["bereichwahl"] = "1"
       tempDic["analog"] = "6"
       tempDic["temperatur"] = "10.5°"
       tempDic["batterie"] = "1.0V"
       tempDic["stellen"] = "1"
-      tempDic["majorteiley"] = "16"
-      tempDic["minorteiley"] = "2"
-
-//      swiftArray.append(tempDic )
+      tempDic["majorteiley"] = "1"
+      tempDic["minorteiley"] = "5"
+      tempDic["exponent"] = String(1)
+      tempDic["sorte"] = "A"
+      swiftArray.append(tempDic )
      
       tempDic["on"] = String(1)
 //      tempDic["device"] = devicearray[2]
@@ -548,6 +555,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       tempDic["stellen"] = "1"
       tempDic["majorteiley"] = "8"
       tempDic["minorteiley"] = "2"
+      tempDic["sorte"] = "°C"
       
 //      swiftArray.append(tempDic )
 
@@ -639,6 +647,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          dataordinate.setStellen(stellen: Int(swiftArray[nr]["stellen"]!)!)
          dataordinate.setDevice(devicestring:swiftArray[nr]["device"]!)
          dataordinate.setDeviceID(deviceIDstring:swiftArray[nr]["deviceID"]!)
+         dataordinate.setSorte(sorte:swiftArray[nr]["sorte"]!)
          dataordinate.wantsLayer = true
          let color : CGColor = CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
          dataordinate.layer?.backgroundColor = color
@@ -1217,16 +1226,22 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       }
    }
    
+   @IBAction func reportZeitkompression(_ sender: NSPopUpButton)
+   {
+      print("reportZeitkompression index: \(sender.indexOfSelectedItem)")
+      let index = sender.indexOfSelectedItem
+      let wahl:String = sender.titleOfSelectedItem!
+      let faktor = Float(wahl)
+      print("reportZeitkompression faktor: \(faktor)")
+      self.datagraph.setZeitkompression(kompression: faktor ?? 1.0)
+   
+   } // end reportZeitkompression
    
    
    
    
    
-   
-   
-   
-   
-   
+ 
    
    
    
@@ -1432,8 +1447,10 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          
          
-         var devicenummer = Int((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0x0F // Device, 1-4
-         let datacode = (Int32((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
+         var devicenummer = Int((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0x0F // Device, 1-4
+         let datacode = (Int32((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
+         print("TEENSY_DATA datacode: \(datacode)") // bit 3-5: Bits fuer Spannung, Strom, Temperatur. alle ON: datacode ist 7
+         
          devicenummer &= 0x0F
          let wl_callback_status = UInt8(teensy.read_byteArray[2])
          //print("wl_callback_status: \(wl_callback_status)")
@@ -1492,7 +1509,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             let device = devicelinie["device"]!
             let analog = devicelinie["A"]! // Tastenstatus Kanaele           
             //print ("deviceindex: \(deviceindex) analog: \(analog)")
-            let devicecode = UInt8(deviceindex)
+            //let devicecode = UInt8(deviceindex)
             let oldstatus = Int(swiftArray[deviceindex]["on"]!) // bisheriger status, nur update wenn changed
             print("oldstatus: \(oldstatus) ")
            /*
@@ -1571,6 +1588,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let I_A = I_A_LO | (I_A_HI<<8)
          print("Strom A: \(I_A)")
          stromMFeld.integerValue = Int(I_A)
+         let I_A_float = Float(I_A)
          
          // Temperatur SOURCE
          let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
@@ -1596,6 +1614,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          
          messungfloatarray[0][DIAGRAMMDATA_OFFSET + 0] = U_M_float  // DIAGRAMMDATA_OFFSET 4
+         
+         messungfloatarray[1][DIAGRAMMDATA_OFFSET + 0] = I_A_float
+         
          
          let tempzeit = tagsekunde()
          
@@ -1623,16 +1644,21 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          var deviceDatastring = ("\(devicenummer) \t")
          let devicedata = swiftArray[Int(devicenummer)]
          
-         //print("devicedata: \(devicedata)")
+         let spannungid = datacode & (1<<SPANNUNG_ID)
+         let stromid = datacode & (1<<STROM_ID)
+         let tempid = datacode & (1<<TEMP_ID)
+         print("datacode: \(datacode) spannungid: \(spannungid) stromid: \(stromid) tempid: \(tempid)")
+         
          if (devicedata["on"] == "1") // device vorhanden
          {
+            
             let analog = UInt8(devicedata["A"]!)! // code fuer tasten des SegmentedControl
             
             // Zeile der Daten aus teensy
             //              let messungfloatzeilenarray:[Float] = messungfloatarray[device]
             //              print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
             
-            let devicecode = UInt8(devicenummer)
+            //let devicecode = UInt8(devicenummer)
             
             let deviceID = Int(devicearray.index(of:devicedata["device"]!)!)
             
@@ -1640,6 +1666,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             //print("device: \(deviceID)   messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
             //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
             
+           
             // Kanaele des device abfragen
             for kanal in 0..<4
             {
@@ -1903,7 +1930,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          //print("\(teensy.read_byteArray)\tmessungnummer: \(messungnummer)")
          
          
-         var devicenummer:Int = Int(((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0x0F) // Device, 1-4
+         var devicenummer:Int = Int(((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0x0F) // Device, 1-4
          
          print("messungnummer: \(messungnummer)\tdevicenummer: \(devicenummer)")
          //print("\(teensy.read_byteArray)\nmessungnummer: \(messungnummer)\tdevicenummer: \(devicenummer)")
@@ -1943,7 +1970,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             print("counter: \(counter)")
          }
          
-         let datacode = (Int32((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
+         let datacode = (Int32((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
          
  //        var channelnummer = Int32((teensy.read_byteArray[CHANNEL + DATA_START_BYTE]))
          
@@ -2083,8 +2110,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             let counterHI = Int32(teensy.read_byteArray[DATACOUNT_HI_BYTE])
             let counter = (counterLO ) | ((counterHI )<<8)
             print("counter: \(counter)")
-            var devicenummer = Int((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0x0F // Device, 1-4
-            let datacode = (Int32((teensy.read_byteArray[DEVICE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
+            var devicenummer = Int((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0x0F // Device, 1-4
+            let datacode = (Int32((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
             devicenummer &= 0x0F
             let wl_callback_status = UInt8(teensy.read_byteArray[2])
             print("wl_callback_status: \(wl_callback_status)")
@@ -2401,7 +2428,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                      //print("\t\twert_norm: \t\(wert_norm)")
                      tempwerte[diagrammkanalindex] = wert_norm
                      werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
-                     print("DEVICE \(deviceID)  werteArray: ")
+                     print("DEVICE_BYTE \(deviceID)  werteArray: ")
                      for zeile in werteArray
                      {
                           print("\(zeile)")

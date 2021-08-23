@@ -103,8 +103,9 @@ class Abszisse: NSView{
       let StartwertX: CGFloat = 0.0 // Abszisse des ersten Wertew
       
      
-      let rastervertikal = 1 // Sprung innerhalb MajorTeileY + MinorTeileY
+      var rastervertikal = 1 // Sprung innerhalb MajorTeileY + MinorTeileY
       let Device = "home"
+      var Sorte = "T" 
    }
 
    var AbszisseVorgaben = Vorgaben()
@@ -162,7 +163,7 @@ class Abszisse: NSView{
       let textfarbe:NSColor = NSColor.init(cgColor:linienfarbe)!
       var tempWertString = ""
       
-      for pos in 0...(AbszisseVorgaben.MajorTeileY - 1)
+      for pos in 0..<(AbszisseVorgaben.MajorTeileY)
       {
          path.addLine(to: CGPoint(x:ordinatex - bigmark, y: posy))
          
@@ -184,6 +185,11 @@ class Abszisse: NSView{
             case 1:
             tempWertString = String(format: "%3.1f",  Float(wert)/10)
                   break
+            
+            case 2:
+               tempWertString = String(format: "%3.2f",  Float(wert)/100.0)
+                  break
+            
             default:
                break
             }
@@ -208,11 +214,26 @@ class Abszisse: NSView{
          }
          
          var subposy = posy // aktuelle Position
-         for _ in 1..<(AbszisseVorgaben.MinorTeileY)
+         for minpos in 1..<(AbszisseVorgaben.MinorTeileY)
          {
+            //Swift.print("minorteile minpos: \(minpos)")
             subposy = subposy + subdistanz
             path.move(to: CGPoint(x:  ordinatex, y: subposy ))
             path.addLine(to: CGPoint(x:ordinatex - submark,y: subposy))
+            if AbszisseVorgaben.MajorTeileY == 1
+            {
+              Swift.print("*** minpos: \(minpos)")
+               let paragraphStyle = NSMutableParagraphStyle()
+               paragraphStyle.alignment = .right
+
+               let attrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue-Thin", size: abszissesize)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle,convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor):textfarbe]
+               
+               let p = path.currentPoint
+               let wert:Float = Float(minpos)
+               tempWertString = String(format: "%1.1f",  Float(wert)/Float(AbszisseVorgaben.MinorTeileY))
+               tempWertString.draw(with: CGRect(x: p.x - 44 , y: p.y - abszissesize, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
+
+            }
             
          }
          
@@ -226,6 +247,8 @@ class Abszisse: NSView{
       
       let p = path.currentPoint
       let wert = (AbszisseVorgaben.MajorTeileY - AbszisseVorgaben.Nullpunkt) * deznummer
+      
+      
       switch (AbszisseVorgaben.Stellen)
       {
       case 0:
@@ -240,7 +263,7 @@ class Abszisse: NSView{
          break
       }
 
-      
+      // oberten Wert schreiben
       //Swift.print("p: \(p) tempWertString: \(tempWertString)")
       let paragraphStyle = NSMutableParagraphStyle()
       paragraphStyle.alignment = .right
@@ -249,8 +272,15 @@ class Abszisse: NSView{
       tempWertString.draw(with: CGRect(x: p.x - 42 , y: p.y - 5, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
       
       
+      tempWertString =  AbszisseVorgaben.Sorte
+      let SorteAttrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue", size: 12)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle, convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor):textfarbe]
+
+      tempWertString.draw(with: CGRect(x: p.x - 40 , y: p.y + 10, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(SorteAttrs), context: nil)
+ 
       return path
    }
+   
+   
    func backgroundColor_n(color: NSColor)
    {
       wantsLayer = true
@@ -338,7 +368,11 @@ extension Abszisse
       {
          AbszisseVorgaben.Nullpunkt = Int((vorgaben["Nullpunkt"])!)
       }
-      
+      if (vorgaben["exponent"] != nil)
+      {
+         AbszisseVorgaben.Exponent = Int((vorgaben["Exponent"])!)
+      }
+    
       
       needsDisplay = true
    }
@@ -391,6 +425,11 @@ extension Abszisse
    open func setLinienfarbe(farbe:CGColor)
    {
       linienfarbe = farbe
+   }
+
+   open func setSorte(sorte:String)
+   {
+      AbszisseVorgaben.Sorte = sorte
    }
 
    open func update()
