@@ -16,10 +16,15 @@ public var lastDataRead = Data.init(count:64)
 
 
 //let DATA_START_BYTE   = 8    // erstes byte fuer Data auf USB
-let BATT_MIN = 2.8
+let BATT_MIN = 3.0 // V 
+let BATT_MAX = 4.2 // V
+
+let STROM_HI = 1000 // mA
+let STROM_LO = 50   // mA
+let STROM_REP = 100 // Reparaturstrom bei Unterspannung
 let TEENSYVREF:Float = 249.0 // Korrektur von Vref des Teensy: nomineller Wert ist 256 2.56V
 
-
+let ADC_FAKTOR:Float = 3.2 // reduktionsfaktor Batterie zu adc
 
 
 
@@ -247,6 +252,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let  I_SHUNT_L_BYTE = 20
    let  I_SHUNT_H_BYTE = 21
 
+   let   TEMP_SOURCE_L_BYTE = 24
+   let   TEMP_SOURCE_H_BYTE = 25
+
+   let   TEMP_BATT_L_BYTE = 26
+   let   TEMP_BATT_H_BYTE = 27
+
  
    // bits von masterstatus
 
@@ -331,9 +342,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
    
    @IBOutlet  weak  var data0: NSTextField!
-   @IBOutlet  weak  var stromM: NSTextField!
-   @IBOutlet  weak  var stromO: NSTextField!
-   
+   @IBOutlet  weak  var stromMFeld: NSTextField!
+   @IBOutlet  weak  var stromOFeld: NSTextField!
+ 
+   @IBOutlet  weak  var TempSourceFeld: NSTextField!
+   @IBOutlet  weak  var TempBattFeld: NSTextField!
+ 
    @IBOutlet  weak  var inputDataFeld: NSTextView!
    
 /*
@@ -472,15 +486,10 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       IntervallPop.addItems(withObjectValues:["1","2","5","10","20","30","60","120","180","300"])
       IntervallPop.selectItem(at:0)
  
-      swiftArray.removeAll()
-      var dic = [[String:String]](repeating:["on":"1"], count:20)
+      let mayorteiley = 5
       
-      dic[0]["on"] = String(1)
-      dic[0]["device"] = devicearray[0]
-      dic[0]["deviceID"] = "0"
-      dic[0]["description"] = "Spannung"
-      //dic["A"] = String(0) // Kanaele Analog
-
+      swiftArray.removeAll()
+ 
       var tempDic = [String:String]()
       tempDic["on"] = String(1)
       tempDic["device"] = devicearray[0]
@@ -496,7 +505,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       tempDic["temperatur"] = "16.5°"
       tempDic["batterie"] = "1.0V"
       tempDic["stellen"] = "1"
-      tempDic["majorteiley"] = "5"
+      tempDic["majorteiley"] = String(mayorteiley) //"5"
       tempDic["minorteiley"] = "2"
 //      print("tempDic: \(tempDic)")
       
@@ -542,7 +551,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       
 //      swiftArray.append(tempDic )
 
-      
+      self.datagraph.setMajorteileY(majorteileY: mayorteiley)
       
       var lineindex=0
       for var deviceline in swiftArray
@@ -600,8 +609,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       //self.datagraph.layer?.backgroundColor = CGColor.black
      // self.datagraph.setDatafarbe(farbe:NSColor.red, index:0)
       
-      self.datagraph.linienfarbeArray[0] = linienfarbeArray_green
-      self.datagraph.linienfarbeArray[1] = linienfarbeArray_blue
+      self.datagraph.linienfarbeArray[0] = linienfarbeArray_blue
+      self.datagraph.linienfarbeArray[1] = linienfarbeArray_green
       self.datagraph.linienfarbeArray[2] = linienfarbeArray_red
       
       // MARK: - taskTab
@@ -625,6 +634,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          dataordinate.identifier = convertToOptionalNSUserInterfaceItemIdentifier("dataordinate\(nr)")
          dataordinate.setLinienfarbe(farbe: datagraph.linienfarbeArray[nr][7].cgColor)
          dataordinate.setMajorTeileY(majorteiley: Int(swiftArray[nr]["majorteiley"]!)!)
+         //print("nr: \(nr) dataordinate.setMajorTeileY: \(swiftArray[nr]["majorteiley"])")
          dataordinate.setMinorTeileY(minorteiley: Int(swiftArray[nr]["minorteiley"]!)!)
          dataordinate.setStellen(stellen: Int(swiftArray[nr]["stellen"]!)!)
          dataordinate.setDevice(devicestring:swiftArray[nr]["device"]!)
@@ -1334,10 +1344,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
  //     print("newLoggerDataAktion  taskcode: \(String(format:"%02X",taskcode))")
     
       let  stromMwert:UInt16 = (UInt16(lastData[U_M_H_BYTE + DATA_START_BYTE])<<8) | UInt16((lastData[U_M_L_BYTE + DATA_START_BYTE]))
-      stromM.integerValue = Int(stromMwert)
+      stromMFeld.integerValue = Int(stromMwert)
       let  stromOwert:UInt16 = (UInt16(lastData[U_O_H_BYTE + DATA_START_BYTE])<<8) | UInt16((lastData[U_O_L_BYTE + DATA_START_BYTE]))
-      stromO.integerValue = Int(stromOwert)
-      //StromIndikator.integerValue = Int(stromMwert)
+      
+      stromOFeld.integerValue = Int(stromOwert)
+      //StromIndikator.integerValue = Int(stromMFeldwert)
       var ii = 0
       while ii < 10
       {
@@ -1553,6 +1564,29 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
 //         print("TEENSY_DATA O_M: \(U_O) O_O_float: \(U_O_float) U_O_norm: \(U_O_norm)")
  
          
+         // Strom
+         let I_A_LO = UInt16(teensy.read_byteArray[STROM_A_L_BYTE  + DATA_START_BYTE])
+         let I_A_HI = UInt16(teensy.read_byteArray[STROM_A_H_BYTE  + DATA_START_BYTE])
+         
+         let I_A = I_A_LO | (I_A_HI<<8)
+         print("Strom A: \(I_A)")
+         stromMFeld.integerValue = Int(I_A)
+         
+         // Temperatur SOURCE
+         let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
+         let Temp_Source_HI = UInt16(teensy.read_byteArray[TEMP_SOURCE_H_BYTE  + DATA_START_BYTE])
+         let Temp_Source = Temp_Source_LO | (Temp_Source_HI<<8)
+         print("Temp_Source: \(Temp_Source)")
+         TempSourceFeld.integerValue = Int(Temp_Source)
+               
+         // Temperatur BATT
+         let Temp_Batt_LO = UInt16(teensy.read_byteArray[TEMP_BATT_L_BYTE  + DATA_START_BYTE])
+         let Temp_Batt_HI = UInt16(teensy.read_byteArray[TEMP_BATT_H_BYTE  + DATA_START_BYTE])
+         let Temp_Batt = Temp_Batt_LO | (Temp_Batt_HI<<8)
+         print("Temp_Batt: \(Temp_Batt)")
+         TempBattFeld.integerValue = Int(Temp_Batt)
+          
+         
          var temparray:[UInt8] = []
          for pos in DATA_START_BYTE..<BUFFER_SIZE
          {
@@ -1629,22 +1663,24 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                   case 0: // teensy
                      switch kanal
                      {
-                     case 0: // 5V
+                     case 0,1: // 5V
+                    
                         stellen = 2
                         if (kanal == 0 || kanal == 2) // 5V, geteilt durch 2
                         {
                            //print("kanal 0,2")
-                           wert_norm = wert * 340 / 1024 
+                           //wert_norm = wert * 340 / 1024 //Ref 3.
+                           wert_norm = wert * 338 / 1024 / ADC_FAKTOR
+                           
                            AnzeigeFaktor = 1.0 // Anzeige strecken
-                           SortenFaktor = 100 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
+                           SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
                            if (kanal == 2)
                            {
                               //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
                            }
                            
                         }
-                         case 1: // 5V
-                        wert_norm = wert / 10.240 // KTY_FAKTOR
+                     
                      case 2: // PT100
                         wert_norm = wert
                      case 3: // aux
@@ -1652,7 +1688,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                         
                      default: break
                      }// swicht kanal
-
+                     
                      
                      
                      //print("switch  teensy deviceID : \(deviceID) kanal: \(kanal)")

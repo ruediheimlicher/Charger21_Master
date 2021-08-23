@@ -31,7 +31,7 @@
 
 - (void)drawRect:(NSRect)rect
 {
-	[self drawAnzeige];
+	//[self drawAnzeige];
 }
 
 - (void)setStringLevel:(NSString*)derLevel
@@ -102,7 +102,7 @@
 
 - (void)drawAnzeige
 {
-	[self lockFocus];
+	//[self lockFocus];
 	//NSLog(@"drawAnzeige: level: %f",Level);
 	int i;
 	NSRect f;
@@ -138,7 +138,7 @@
 		[NSBezierPath fillRect:f];
 	}//for i
 
-	[self unlockFocus];
+	//[self unlockFocus];
 
 }
 - (void)fixTimerfunktion:(NSTimer*)timer

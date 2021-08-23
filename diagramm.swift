@@ -53,9 +53,9 @@ class DataPlot: NSView
    struct   Vorgaben
    {
       
-      static var MajorTeileY: Int = 16                           // Teile der Hauptskala
+      static var MajorTeileY: Int = 10                           // Teile der Hauptskala
       static var MinorTeileY: Int = 2                             // Teile der Subskala
-      static var MaxY: CGFloat = 160.0                            // Obere Grenze der Anzeige, muss zu MajorTeileY passen
+      static var MaxY: CGFloat = 100.0                            // Obere Grenze der Anzeige, muss zu MajorTeileY passen
       static var MinY: CGFloat = 0.0                              // Untere Grenze der Anzeige
       static var MaxX: CGFloat = 1000                             // Obere Grenze der Abszisse
       static var Nullpunkt:Int = 0
@@ -246,7 +246,6 @@ class DataPlot: NSView
       {
          Vorgaben.MajorTeileY = Int((vorgaben["MajorTeileY"])!)
       }
-      
       if (vorgaben["MinorTeileY"] != nil)
       {
          Vorgaben.MinorTeileY = Int((vorgaben["MinorTeileY"])!)
@@ -296,6 +295,16 @@ class DataPlot: NSView
    open func setMaxY(maxY:Int)
    {
       Vorgaben.MaxY = CGFloat(maxY)
+   }
+
+   open func setMajorteileY(majorteileY:Int)
+   {
+      Vorgaben.MajorTeileY = majorteileY
+   }
+
+   open func setMinorteileY(minorteileY:Int)
+   {
+      Vorgaben.MinorTeileY = minorteileY
    }
    
    open func setKanalArray(kanalArray:[Int])
@@ -889,31 +898,127 @@ extension DataPlot
       return path
    }
    
-   func horizontalelinen(rect: CGRect)->CGPath
+   func horizontalelinienArray(rect: CGRect)->[CGPath]
    {
-      let path = CGMutablePath()
-      
+      var patharray:[CGMutablePath] = []
+      let context = NSGraphicsContext.current?.cgContext
       let liniestart = rect.origin.x
       let linieend = rect.origin.x + rect.size.width
       
       let bigmark = CGFloat(10)
       let submark = CGFloat(3)
       
-      let deltay = rect.size.height / CGFloat(Vorgaben.MajorTeileY)  * CGFloat(Vorgaben.rastervertikal)
+      // Anzahl linien insgesamt
+      let anzlinien:Int = Vorgaben.MajorTeileY *  Vorgaben.MinorTeileY
+      // Vertikale Schrittweite der linien
+      
+//      let deltay = rect.size.height / CGFloat(Vorgaben.MajorTeileY)  * CGFloat(Vorgaben.rastervertikal)
+      let deltay = rect.size.height / CGFloat(anzlinien)      
       var posy = rect.origin.y
-      for pos in 0...(Vorgaben.MajorTeileY )
+      Swift.print("anzlinien: \(anzlinien) height: \(rect.size.height) deltay: \(deltay)")
+      
+      for pos in 0...(anzlinien)
       {
-         if ((pos > 0) && (( pos % Vorgaben.rastervertikal ) == 0))
+         let s = (pos % Vorgaben.rastervertikal) // Unterscheidung Major/Minorlinien
+         if ((( pos % Vorgaben.rastervertikal ) == 0))
          {
-            let s = (Vorgaben.rastervertikal % pos)
-            //Swift.print("pos: \(pos) y: \(rect.origin.y +  CGFloat(pos / Vorgaben.rastervertikal) * CGFloat(deltay))")
-            path.move(to: CGPoint(x: liniestart , y: rect.origin.y +  CGFloat(pos / Vorgaben.rastervertikal) * CGFloat(deltay)))
+            Swift.print("majorpos: \(pos) s: \(s)")
+            //let linienbreite:CGFloat = 4.0
+            //Swift.print("majorpos: \(pos) y: \(rect.origin.y +  CGFloat(pos / Vorgaben.rastervertikal) * CGFloat(deltay))")
+            var majorpath = CGMutablePath()
+            
+            majorpath.move(to: CGPoint(x: liniestart , y: rect.origin.y +  CGFloat(pos ) * CGFloat(deltay)))
+            //majorpath.linewidth = linienbreite
+            //context?.setLineWidth(linienbreite)
             //path.move(to: rect.origin)
             // linie nach rechts
-            path.addLine(to: CGPoint(x: linieend, y: rect.origin.y  +  CGFloat(pos / Vorgaben.rastervertikal) * CGFloat(deltay)))
-            
+            majorpath.addLine(to: CGPoint(x: linieend, y: rect.origin.y  +  CGFloat(pos ) * CGFloat(deltay)))
+            majorpath.closeSubpath()
+           // let dick:CGPath = majorpath.copy(strokingWithWidth: linienbreite, lineCap: .butt, lineJoin: .miter, miterLimit: 0) as! CGMutablePath
+            patharray.append(majorpath)
          }
+         else
+         {
+            Swift.print("minorpos: \(pos) s: \(s)")
+            //let linienbreite:CGFloat = 1.0
+            var minorpath = CGMutablePath()
+            minorpath.move(to: CGPoint(x: liniestart , y: rect.origin.y +  CGFloat(pos ) * CGFloat(deltay)))
+            //path.move(to: rect.origin)
+            // linie nach rechts
+            //context?.setLineWidth(linienbreite)
+            minorpath.addLine(to: CGPoint(x: linieend, y: rect.origin.y  +  CGFloat(pos ) * CGFloat(deltay)))
+            minorpath.closeSubpath()
+            patharray.append(minorpath)
+           
+         }
+         
       }
+      // unterste Linie
+      let basispath = CGMutablePath()
+      basispath.move(to: CGPoint(x: liniestart , y: rect.origin.y ))
+      //path.move(to: rect.origin)
+      // linie nach rechts
+      basispath.addLine(to: CGPoint(x: linieend, y: rect.origin.y))
+      // wieder nach links
+      patharray.append(basispath)
+      
+      return patharray
+   }
+   func horizontalelinen(rect: CGRect)->CGPath
+   {
+      var path = CGMutablePath()
+      let context = NSGraphicsContext.current?.cgContext
+      let liniestart = rect.origin.x
+      let linieend = rect.origin.x + rect.size.width
+      
+      let bigmark = CGFloat(10)
+      let submark = CGFloat(3)
+      
+      // Anzahl linien insgesamt
+      let anzlinien:Int = Vorgaben.MajorTeileY *  Vorgaben.MinorTeileY
+      // Vertikale Schrittweite der linien
+      
+//      let deltay = rect.size.height / CGFloat(Vorgaben.MajorTeileY)  * CGFloat(Vorgaben.rastervertikal)
+      let deltay = rect.size.height / CGFloat(anzlinien)      
+      var posy = rect.origin.y
+      Swift.print("anzlinien: \(anzlinien) height: \(rect.size.height) deltay: \(deltay)")
+      
+      for pos in 0...(anzlinien)
+      {
+         let s = (pos % Vorgaben.rastervertikal) // Unterscheidung Major/Minorlinien
+         if ((( pos % Vorgaben.rastervertikal ) == 0))
+         {
+            Swift.print("majorpos: \(pos) s: \(s)")
+            let linienbreite:CGFloat = 4.0
+            //Swift.print("majorpos: \(pos) y: \(rect.origin.y +  CGFloat(pos / Vorgaben.rastervertikal) * CGFloat(deltay))")
+            var majorpath = CGMutablePath()
+            majorpath.move(to: CGPoint(x: liniestart , y: rect.origin.y +  CGFloat(pos ) * CGFloat(deltay)))
+            //majorpath.linewidth = linienbreite
+            //context?.setLineWidth(linienbreite)
+            //path.move(to: rect.origin)
+            // linie nach rechts
+            majorpath.addLine(to: CGPoint(x: linieend, y: rect.origin.y  +  CGFloat(pos ) * CGFloat(deltay)))
+            majorpath.closeSubpath()
+           // let dick:CGPath = majorpath.copy(strokingWithWidth: linienbreite, lineCap: .butt, lineJoin: .miter, miterLimit: 0) as! CGMutablePath
+            path.addPath(majorpath)
+         }
+         else
+         {
+            Swift.print("minorpos: \(pos) s: \(s)")
+            let linienbreite:CGFloat = 1.0
+            var minorpath = CGMutablePath()
+            minorpath.move(to: CGPoint(x: liniestart , y: rect.origin.y +  CGFloat(pos ) * CGFloat(deltay)))
+            //path.move(to: rect.origin)
+            // linie nach rechts
+            //context?.setLineWidth(linienbreite)
+            minorpath.addLine(to: CGPoint(x: linieend, y: rect.origin.y  +  CGFloat(pos ) * CGFloat(deltay)))
+            minorpath.closeSubpath()
+            path.addPath(minorpath)
+           
+         }
+         
+      }
+      // unterste Linie
       path.move(to: CGPoint(x: liniestart , y: rect.origin.y ))
       //path.move(to: rect.origin)
       // linie nach rechts
@@ -1067,6 +1172,11 @@ extension DataPlot
       //Swift.print("GraphArray: \n\(GraphArray)")
       
       var path = CGMutablePath()
+      let red = CGColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+      let blue = CGColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 1.0)
+      let gray = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.6)
+      let lightgray = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.3)
+      
       
       /*
        http://stackoverflow.com/questions/15643626/scale-cgpath-to-fit-uiview
@@ -1109,16 +1219,44 @@ extension DataPlot
       var achsenfeld = diagrammfeld
       achsenfeld.origin.x = 0
       let achsenpath = achsen(rect:achsenfeld)
-      context?.setLineWidth(0.4)
+      //context?.setLineWidth(2.4)
       context?.addPath(achsenpath)
       
       let horizontalelinenfeld = self.diagrammfeld
       let horizontalelinenpfad = horizontalelinen(rect:horizontalelinenfeld)
       
-      context?.addPath(horizontalelinenpfad)
       
-      context?.drawPath(using: .stroke)
+   //   context?.addPath(horizontalelinenpfad)
+
+      let horizontalelinienarray = horizontalelinienArray(rect:horizontalelinenfeld)
+      for l in 0..<horizontalelinienarray.count
+      {
+         Swift.print("l: \(l)")
+         if l%2 == 0
+         {
+            Swift.print("blue")
+            context?.addPath(horizontalelinienarray[l])
+            context?.setStrokeColor(gray)
+            context?.setLineWidth(0.6)
+            context?.drawPath(using: .stroke)
+            
+         }
+         else 
+         {
+            Swift.print("red")
+            context?.addPath(horizontalelinienarray[l])
+            context?.setStrokeColor(lightgray)
+            context?.setLineWidth(0.3)
+            context?.drawPath(using: .stroke)
+
+         }
+      }
       
+//      context?.setStrokeColor(blue)
+//      context?.drawPath(using: .stroke)
+      
+   //   context?.setStrokeColor(borderColor)
+      context?.setLineWidth(0.4)
       let ordinatebreite = CGFloat(10.0)
       var ordinaterect = diagrammfeld
       ordinaterect.size.width = ordinatebreite

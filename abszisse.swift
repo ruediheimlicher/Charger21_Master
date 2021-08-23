@@ -89,7 +89,7 @@ class Abszisse: NSView{
       var MajorTeileY: Int = 16                           // Teile der Hauptskala
       var MinorTeileY: Int = 2                             // Teile der Subskala
       var Nullpunkt:Int = 0                              // Nullpunkt bei deisem MajorTeil
-      
+      var Schriftgroesse = 8
       var MaxY: CGFloat = 160.0                            // Obere Grenze der Anzeige, muss zu MajorTeileY passen
       var MinY: CGFloat = 0.0                              // Untere Grenze der Anzeige
       var MaxX: CGFloat = 1000                             // Obere Grenze der Abszisse
@@ -102,7 +102,8 @@ class Abszisse: NSView{
       let DiagrammeckeY: CGFloat = 0.0 //
       let StartwertX: CGFloat = 0.0 // Abszisse des ersten Wertew
       
-      let rastervertikal = 2 // Sprung innerhalb MajorTeileY + MinorTeileY
+     
+      let rastervertikal = 1 // Sprung innerhalb MajorTeileY + MinorTeileY
       let Device = "home"
    }
 
@@ -155,6 +156,7 @@ class Abszisse: NSView{
       //marken setzen
       let markdistanz = rect.size.height / (CGFloat(AbszisseVorgaben.MajorTeileY ) )
       let subdistanz = CGFloat(markdistanz) / CGFloat(AbszisseVorgaben.MinorTeileY)
+      let abszissesize = CGFloat(AbszisseVorgaben.Schriftgroesse)
       var posy = rect.origin.y
       let deznummer = NSDecimalNumber(decimal:pow(10,AbszisseVorgaben.Exponent)).intValue
       let textfarbe:NSColor = NSColor.init(cgColor:linienfarbe)!
@@ -200,9 +202,9 @@ class Abszisse: NSView{
             
        //     let textfarbe = NSColor.init?(colorSpace:colspace ,components:comp)
        //     let textfarbe = NSColor.init(red:1.0,green: 0.0, blue: 0.0,alpha:1.0)
-            let attrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue-Thin", size: 9)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle,convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor):textfarbe]
+            let attrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue-Thin", size: abszissesize)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle,convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor):textfarbe]
             
-            tempWertString.draw(with: CGRect(x: p.x - 42 , y: p.y - 5, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
+            tempWertString.draw(with: CGRect(x: p.x - 42 , y: p.y - abszissesize, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
          }
          
          var subposy = posy // aktuelle Position
