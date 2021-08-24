@@ -222,7 +222,7 @@ class Abszisse: NSView{
             path.addLine(to: CGPoint(x:ordinatex - submark,y: subposy))
             if AbszisseVorgaben.MajorTeileY == 1
             {
-              Swift.print("*** minpos: \(minpos)")
+              //Swift.print("*** minpos: \(minpos)")
                let paragraphStyle = NSMutableParagraphStyle()
                paragraphStyle.alignment = .right
 

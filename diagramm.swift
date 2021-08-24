@@ -560,13 +560,14 @@ class DataPlot: NSView
       var AnzeigeFaktor:CGFloat = 1.0 //= maxSortenwert/maxAnzeigewert;
       var SortenFaktor:CGFloat = 1.0
       var deviceID:CGFloat  = 0
-      let feld = DiagrammRect(rect: self.bounds)
+      let feld = DiagrammRect(rect: self.bounds) //Feld des Diagramms, mit Abstaenden vom Rand aus Geom
       //let FaktorX:CGFloat = (self.frame.size.width-15.0)/Vorgaben.MaxX		// Umrechnungsfaktor auf Diagrammbreite
       var FaktorX:CGFloat = feld.size.width/Vorgaben.MaxX / CGFloat(Vorgaben.Intervall)
       FaktorX = 1.0
-      //            //let FaktorY:CGFloat = (self.frame.size.height-(Geom.randoben + Geom.randunten))/Vorgaben.MaxY		// Umrechnungsfaktor auf Diagrammhoehe
+      //         let FaktorY:CGFloat = (self.frame.size.height-(Geom.randoben + Geom.randunten))/Vorgaben.MaxY		// Umrechnungsfaktor auf Diagrammhoehe
       
-      let FaktorY:CGFloat = feld.size.height / Vorgaben.MaxY
+      let FaktorY:CGFloat = feld.size.height / Vorgaben.MaxY  
+      
       //Swift.print("ordinate feld height: \(feld.size.height) Vorgaben.MaxY: \(Vorgaben.MaxY) FaktorY: \(FaktorY) ")
       
       
@@ -600,18 +601,21 @@ class DataPlot: NSView
       {
          if (i < werteArray.count)
          {
-            //   Swift.print("i: \(i) werteArray: \(werteArray)")
+               Swift.print("i: \(i) werteArray: \(werteArray)")
             // werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
             AnzeigeFaktor = CGFloat(werteArray[i+1][3])
         //    Swift.print("i: \(i) AnzeigeFaktor: \(AnzeigeFaktor)")
             if (Int(AnzeigeFaktor) > 0)
             {
+               
                neuerPunkt.y = feld.origin.y
               // Swift.print("i: \(i) werteArray 0: \(werteArray[0]) neuerPunkt.x nach: \(neuerPunkt.x) neuerPunkt.y: \(neuerPunkt.y)")
                
                let InputZahl = CGFloat(werteArray[i+1][0])	// Input vom teensy, 0-255. Wert an 0 ist abszisse
                
                deviceID = CGFloat(werteArray[i+1][1]) // ID des device
+               
+               
                tempKanalDatenDic["dev\(i)"] = deviceID // deviceID mitgeben
                //  Swift.print("i: \(i) dev: \(deviceID)")
                
@@ -1424,7 +1428,6 @@ extension DataPlot
       // let diagrammrect = CGRect.init(x: rect.origin.x + Geom.offsetx, y: rect.origin.y + Geom.offsety, width: rect.size.width - Geom.offsetx - Geom.freex , height: rect.size.height - Geom.offsety - Geom.freey)
       
       let diagrammrect = CGRect.init(x: rect.origin.x + Geom.offsetx, y: rect.origin.y + Geom.offsety  + Geom.offsety, width: rect.size.width - Geom.offsetx - Geom.freex  - Geom.randrechts  -  Geom.randlinks, height: rect.size.height - Geom.offsety - Geom.freey  - Geom.randoben - Geom.randunten)
-      
       return diagrammrect
    }
    

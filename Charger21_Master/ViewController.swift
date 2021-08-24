@@ -22,9 +22,12 @@ let BATT_MAX = 4.2 // V
 let STROM_HI = 1000 // mA
 let STROM_LO = 50   // mA
 let STROM_REP = 100 // Reparaturstrom bei Unterspannung
-let TEENSYVREF:Float = 249.0 // Korrektur von Vref des Teensy: nomineller Wert ist 256 2.56V
+let TEENSYVREF:Float = 338.0 // Korrektur von Vref des Teensy: nomineller Wert ist 256 2.56V
 
-let ADC_FAKTOR:Float = 3.2 // reduktionsfaktor Batterie zu adc
+let ADC_U_FAKTOR:Float = 3.2 // reduktionsfaktor Batterie zu adc
+
+let ADC_I_FAKTOR:Float = 6.6 // reduktionsfaktor Batterie zu adc
+
 
 // Bits fuer DEVICE_BYTE (byte auf 0 gesetzt)
 let SPANNUNG_ID = 0 // Bit fuer Batteriespannung // in Teensy 3,4,5
@@ -381,6 +384,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    @IBOutlet  weak  var Teensy_Status: NSButton!
  
    @IBOutlet   var TaskListe: NSTableView!
+   @IBOutlet  weak  var aktivKanalSeg: NSSegmentedControl!
+   
    @IBOutlet  weak  var readData: NSButton!
   
    @IBOutlet   var  Vertikalbalken:rVertikalanzeige!
@@ -503,7 +508,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       tempDic["A0"] = String(0)
       tempDic["analogAtitel"] = "U_M\tU_O\tADC_A\tADC_B"
       tempDic["A1"] = String(1)
-      tempDic["A"] = String(3) // Bits fuer Kanaele Analog
+      tempDic["A"] = String(3) // Bits fuer aktivierte Kanaele Analog
       tempDic["bereich"] = "0-1V\t0-5V\t0-12V"
       tempDic["analog"] = "3"
       tempDic["bereichwahl"] = "1"
@@ -525,8 +530,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       tempDic["description"] = "Strom messen"
       tempDic["A0"] = String(0)
       tempDic["A1"] = String(1)
-      tempDic["A"] = String(7)
-      tempDic["analogAtitel"] = "ADC 2\tADC 3\tADC 4\t--"
+      tempDic["A"] = String(3) // Kanaele 0,1 aktiviert
+      tempDic["analogAtitel"] = "I_U\tI_O\tADC 4\t--"
       tempDic["bereich"] = "0-500mA\t0-1A\t0-2000mA"
       tempDic["bereichwahl"] = "1"
       tempDic["analog"] = "6"
@@ -540,8 +545,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       swiftArray.append(tempDic )
      
       tempDic["on"] = String(1)
-//      tempDic["device"] = devicearray[2]
-//      tempDic["deviceID"] = "2"
+      tempDic["device"] = devicearray[2]
+      tempDic["deviceID"] = "2"
       tempDic["description"] = "Spannung messen mit 12 Bit"
       tempDic["A0"] = "1"
       tempDic["A1"] = "1"
@@ -1020,7 +1025,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          self.datagraph.initGraphArray()
          self.datagraph.setStartsekunde(startsekunde:self.tagsekunde())
-         self.datagraph.setMaxY(maxY: 160)
+         self.datagraph.setMaxY(maxY: 100)
          self.datagraph.setDisplayRect()
          
          self.usb_read_cont = (self.cont_read_check.state.rawValue == 1) // cont_Read wird bei aktiviertem check eingeschaltet
@@ -1418,7 +1423,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          TaskListe.reloadData()
          
-      //MARK: TEENSY_DATA
+      // 
       case TEENSY_DATA: // Data vom Teensy
         // print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
          //print("code ist TEENSY_DATA masterstatus: \(masterstatus)")
@@ -1511,7 +1516,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             //print ("deviceindex: \(deviceindex) analog: \(analog)")
             //let devicecode = UInt8(deviceindex)
             let oldstatus = Int(swiftArray[deviceindex]["on"]!) // bisheriger status, nur update wenn changed
-            print("oldstatus: \(oldstatus) ")
+            //print("oldstatus: \(oldstatus) ")
            /*
             if (wl_callback_status & (1<<devicecode) > 0) // Aenderung in WL-Device
             {
@@ -1612,7 +1617,6 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          }
          messungDataArray.append(temparray) //Array der Daten von readbytearray von DATA_START_BYTE an
          
-         
          messungfloatarray[0][DIAGRAMMDATA_OFFSET + 0] = U_M_float  // DIAGRAMMDATA_OFFSET 4
          
          messungfloatarray[1][DIAGRAMMDATA_OFFSET + 0] = I_A_float
@@ -1649,57 +1653,127 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let tempid = datacode & (1<<TEMP_ID)
          print("datacode: \(datacode) spannungid: \(spannungid) stromid: \(stromid) tempid: \(tempid)")
          
-         if (devicedata["on"] == "1") // device vorhanden
+         //MARK: neu
+         for devicedata in swiftArray
          {
-            
-            let analog = UInt8(devicedata["A"]!)! // code fuer tasten des SegmentedControl
-            
-            // Zeile der Daten aus teensy
-            //              let messungfloatzeilenarray:[Float] = messungfloatarray[device]
-            //              print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
-            
-            //let devicecode = UInt8(devicenummer)
-            
-            let deviceID = Int(devicearray.index(of:devicedata["device"]!)!)
-            
-            let messungfloatzeilenarray:[Float] = messungfloatarray[Int(devicenummer)]                                 // Array mit float-daten des device
-            //print("device: \(deviceID)   messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
-            //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
-            
-           
-            // Kanaele des device abfragen
-            for kanal in 0..<4
+            if (devicedata["on"] == "1") // device vorhanden
             {
-               SortenFaktor = 1
-               AnzeigeFaktor = 1.0
-               stellen = 1
-               let kanalint = UInt8(kanal)
-               if ((analog & (1<<kanalint) > 0) ) // kanal aktiv
+               let segmentstatus = UInt8(devicedata["A"]!)!
+               let dev = String(devicedata["device"] ?? "dev")
+               //print("devicedata: \(devicedata) ")
+               let deviceID = Int(devicedata["deviceID"]!)
+               //print("deviceID: \(deviceID) device: \(dev) ")
+               let messungfloatzeilenarray:[Float] = messungfloatarray[deviceID ?? 0]     
+               print("messungfloatzeilenarray dev: \(dev): \(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0]) ")
+               //print(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0])
+               /*
+                Werte fuer Diagramm auf 100 normieren (MaxY)
+                
+                */
+               // Kanaele des device abfragen
+               for kanal in 0..<4
                {
-                  /*
-                   let messungfloatzeilenarray:[Float] = messungfloatarray[device]  // Array mit float-daten des device
-                   print("device: \(deviceID) kanal: \(kanal)  messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
-                   //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
-                   */
-                  let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET] // 4
-                  print("kanal: \t\(kanal) \twert raw: \t\(wert)")
-                  var wert_norm:Float = wert
-                  
-                  switch deviceID
+                  SortenFaktor = 1
+                  AnzeigeFaktor = 1.0
+                  stellen = 1
+                  let kanalint = UInt8(kanal)
+                  if ((segmentstatus & (1<<kanalint) > 0) ) // kanal aktiv
                   {
-                  case 0: // teensy
-                     switch kanal
+                     /*
+                      let messungfloatzeilenarray:[Float] = messungfloatarray[device]  // Array mit float-daten des device
+                      print("device: \(deviceID) kanal: \(kanal)  messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
+                      //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
+                      */
+                     // Wert auslesen an pos kanal
+                     let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET ] // DIAGRAMMDATA_OFFSET ist 4
+                     print("device: \(dev) kanal: \t\(kanal) \twert raw: \t\(wert)")
+                     var wert_norm:Float = wert
+                     
+                     switch deviceID
                      {
-                     case 0,1: // 5V
-                    
+                     case 0: // Spannung
+                        switch kanal
+                        {
+                        case 0,1: // 5V
+                       
+                           stellen = 2
+                           if (kanal == 0 || kanal == 2) // 5V, geteilt durch 2
+                           {
+                              //print("kanal 0,2")
+                              //wert_norm = wert * 340 / 1024 //Ref 3.
+                              wert_norm = wert * TEENSYVREF / 1024 // Spannung am ADC 
+                              
+                              AnzeigeFaktor = 1.0 // Anzeige strecken
+                              SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
+                              if (kanal == 2)
+                              {
+                                 //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
+                              }
+                              
+                           }
+                        
+                        case 2: // PT100
+                           wert_norm = wert
+                        case 3: // aux
+                           wert_norm = wert
+                           
+                        default: break
+                        }// swicht kanal
+                        
+                        
+                        
+                        //print("switch  teensy deviceID : \(deviceID) kanal: \(kanal)")
+                        break
+                     case 1: // Strom
+                        //let ordinateMajorTeileY = dataAbszisse_Temperatur.AbszisseVorgaben.MajorTeileY
+                        //let ordinateNullpunkt = dataAbszisse_Temperatur.AbszisseVorgaben.Nullpunkt
+                        //print("switch  temp deviceID : \(deviceID) kanal: \(kanal)")
+                        switch kanal
+                        {
+                        case 0,1: // I_A
+                           //print("***        Strom Kanal 0 wert:\(wert)")
+                          
+                           stellen = 2
+                           
+                              //print("kanal 0,1")
+                              //wert_norm = wert * 340 / 1024 //Ref 3.
+                              wert_norm = wert * TEENSYVREF / 1024 * ADC_I_FAKTOR// Spannung am shuntwiderstand aus Diffverstärker, normiert auf 1000mA
+                              
+                              stromOFeld.floatValue = wert_norm
+                              
+                           AnzeigeFaktor = 1.0 // Anzeige strecken
+                              SortenFaktor = 100 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
+                              
+                                 print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
+                              
+                              
+                           
+
+                        case 2: // 
+                           wert_norm = wert
+                        case 3: // aux
+                           wert_norm = wert
+                           
+                        default: break
+                        }// swicht kanal
+                        
+                        
+                        break // THERMOMETER
+                     
+                     case 2:  // ADC12BIT
+                        
+                        //print("switch  ADC deviceID : \(deviceID) kanal: \(kanal)")
+                        
+                        //let ordinateMajorTeileY = dataAbszisse_Volt.AbszisseVorgaben.MajorTeileY
+                        
+                        //let ordinateNullpunkt = dataAbszisse_Volt.AbszisseVorgaben.Nullpunkt
+                        
                         stellen = 2
-                        if (kanal == 0 || kanal == 2) // 5V, geteilt durch 2
+                        if (kanal == 0 || kanal == 2) // 8V, geteilt durch 2
                         {
                            //print("kanal 0,2")
-                           //wert_norm = wert * 340 / 1024 //Ref 3.
-                           wert_norm = wert * 338 / 1024 / ADC_FAKTOR
-                           
-                           AnzeigeFaktor = 1.0 // Anzeige strecken
+                           wert_norm = wert / 0x1000 * 4.096 * 20
+                           AnzeigeFaktor = 2.0 // Anzeige strecken
                            SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
                            if (kanal == 2)
                            {
@@ -1707,105 +1781,49 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                            }
                            
                         }
-                     
-                     case 2: // PT100
-                        wert_norm = wert
-                     case 3: // aux
-                        wert_norm = wert
-                        
-                     default: break
-                     }// swicht kanal
-                     
-                     
-                     
-                     //print("switch  teensy deviceID : \(deviceID) kanal: \(kanal)")
-                     break
-                  case 1:
-                     //let ordinateMajorTeileY = dataAbszisse_Temperatur.AbszisseVorgaben.MajorTeileY
-                     //let ordinateNullpunkt = dataAbszisse_Temperatur.AbszisseVorgaben.Nullpunkt
-                     //print("switch  temp deviceID : \(deviceID) kanal: \(kanal)")
-                     switch kanal
-                     {
-                     case 0: // LM35
-                        wert_norm = wert / 10.0 // LM-Wert kommt mit Faktor 10
-                     
-                     case 1: // KTY
-                        wert_norm = wert // KTY_FAKTOR
-                     case 2: // PT100
-                        wert_norm = wert
-                     case 3: // aux
-                        wert_norm = wert
-                        
-                     default: break
-                     }// swicht kanal
-                     
-                     
-                     break // THERMOMETER
-                  
-                  case 2:  // ADC12BIT
-                     
-                     //print("switch  ADC deviceID : \(deviceID) kanal: \(kanal)")
-                     
-                     //let ordinateMajorTeileY = dataAbszisse_Volt.AbszisseVorgaben.MajorTeileY
-                     
-                     //let ordinateNullpunkt = dataAbszisse_Volt.AbszisseVorgaben.Nullpunkt
-                     
-                     stellen = 2
-                     if (kanal == 0 || kanal == 2) // 8V, geteilt durch 2
-                     {
-                        //print("kanal 0,2")
-                        wert_norm = wert / 0x1000 * 4.096 * 20
-                        AnzeigeFaktor = 2.0 // Anzeige strecken
-                        SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
-                        if (kanal == 2)
+                        if (kanal == 1 || kanal == 3)// 16V, geteilt durch 4
                         {
-                           //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
+                           //print("kanal 1,3")
+                           wert_norm = wert / 0x1000 * 4.096 * 40
+                           SortenFaktor = 10 
                         }
+                     //print("wert_norm: \(wert_norm)")
+                     default: 
                         
-                     }
-                     if (kanal == 1 || kanal == 3)// 16V, geteilt durch 4
-                     {
-                        //print("kanal 1,3")
-                        wert_norm = wert / 0x1000 * 4.096 * 40
-                        SortenFaktor = 10 
-                     }
-                  //print("wert_norm: \(wert_norm)")
-                  default: 
+                        break
+                     }// switch device
                      
-                     break
-                  }// switch device
+                     print("\t\twert_norm: \t\(wert_norm)")
+                     tempwerte[diagrammkanalindex] = wert_norm
+                     werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID ?? 0), SortenFaktor, AnzeigeFaktor]
+                  /*
+                     if deviceID == 1
+                     {
+                        print("werteArray: \(werteArray)")
+                     }
+ */
+                     // Zeile im Textfeld als string aufbauen
+                     let stellenstring = "%.0\(stellen)f"
+                     tempinputDataFeldstring = tempinputDataFeldstring + "\t" +  String(format:"%.\(stellen)f", wert_norm) // Eintrag in inputDataFeld
+                     //let formatstring = "%.\(stellen)f" as NSString
+                     // let str = String(format:"%d, %f, %ld", INT_VALUE, FLOAT_VALUE, DOUBLE_VALUE)
+                     //tempinputDataFeldstring = tempinputDataFeldstring + "\t" + (NSString(format:formatstring, wert_norm) as String)
+                     
+                     deviceDatastring = deviceDatastring  + "\t"  +  String(format:"%.\(stellen)f", wert_norm) 
+                     diagrammkanalindex += 1
+                     //print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
+                     //print("deviceDatastring A: \(deviceDatastring)")
+                     //print("tempinputDataFeldstring A: \(tempinputDataFeldstring)")
+                  } // if (analog & (1<<kanalint) > 0)
                   
-                  //print("\t\twert_norm: \t\(wert_norm)")
-                  tempwerte[diagrammkanalindex] = wert_norm
-                  werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
-                  
-                  // Zeile im Textfeld als string aufbauen
-                  let stellenstring = "%.0\(stellen)f"
-                  tempinputDataFeldstring = tempinputDataFeldstring + "\t" +  String(format:"%.\(stellen)f", wert_norm) // Eintrag in inputDataFeld
-                  //let formatstring = "%.\(stellen)f" as NSString
-                  // let str = String(format:"%d, %f, %ld", INT_VALUE, FLOAT_VALUE, DOUBLE_VALUE)
-                  //tempinputDataFeldstring = tempinputDataFeldstring + "\t" + (NSString(format:formatstring, wert_norm) as String)
-                  
-                  deviceDatastring = deviceDatastring  + "\t"  +  String(format:"%.\(stellen)f", wert_norm) 
-                  diagrammkanalindex += 1
-                  //print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
-                  //print("deviceDatastring A: \(deviceDatastring)")
-                  //print("tempinputDataFeldstring A: \(tempinputDataFeldstring)")
-               } // if (analog & (1<<kanalint) > 0)
-               
-            } // for kanal
+               } // for kanal
+
             
-            inputDataFeld.string = inputDataFeld.string   +     tempinputDataFeldstring + "\n"
-            /*
-            print("TEENSY werteArray: ")
-            for zeile in werteArray
-            {
-               print("\(zeile)")
-            }
-            print("")
-            */
-            TaskListe.reloadData()
-         } //MARK: TEENSY_DATA devicedata == 0n END 
+            } // on = 1
+         }// end swiftArray.count
+         
+   
+         //MARK: TEENSY_DATA devicedata == 0n END 
          
       //https://stackoverflow.com/questions/40478728/appending-text-to-nstextview-in-swift-3
 
@@ -2707,6 +2725,18 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
        return true
     }
 
+   //MARK: TaskListe TableView
+   
+   @IBAction func reportAktivKanalSeg(_ sender: NSSegmentedControl)
+   {
+      //print("reportAktivKanalSeg index: \(sender.indexOfSelectedItem)")
+      let aktivseg = sender.selectedSegment
+      let aktivtag = sender.tag(forSegment: aktivseg)
+      
+      let aktivstatus:Bool = sender.isSelected(forSegment: aktivseg)
+      
+      print("reportAktivKanalSeg  tag: \(aktivtag) aktivstatus: \(aktivstatus)")
+   }
     
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any?
     {
@@ -2764,6 +2794,16 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
           // dfghjkly<xcvbnm,asdfghjksdfghjasf<yxcvbnmxxxxxxsxdcfghj
        }
        
+       else if (ident == "A")
+       {
+          let wahlzelle = tableColumn?.dataCell(forRow: row) as? NSSegmentedCell
+          let auswahl = wahlzelle?.tag
+          
+          print("task wahl A auswahl: \(auswahl) items: \(wahlzelle?.title)")
+          return auswahl
+          // dfghjkly<xcvbnm,asdfghjksdfghjasf<yxcvbnmxxxxxxsxdcfghj
+       }
+
        return "***"
     }
     
@@ -2907,7 +2947,7 @@ extension rDataViewController:NSTableViewDataSource, NSTableViewDelegate
 //         print("check element on: \(element)")
          let knopf = element as! NSButton
          knopf.toolTip = "aktiv"
-         knopf.tag = 1000 + row
+         knopf.tag = 1000 + 10*row
          let status = Int(Float(knopf.state.rawValue))
          let sollstatus = swiftArray[row][ident!]
          let soll = Int(sollstatus!)//.integerValue
@@ -2951,7 +2991,7 @@ extension rDataViewController:NSTableViewDataSource, NSTableViewDelegate
          let element = result.subviews[0]
 //         print("check element A0: \(element)")
          let knopf = element as! NSButton
-         knopf.tag = 1200 + row
+         knopf.tag = 1200 + 10*row
          let status = Int(knopf.state)
          let sollstatus = (swiftArray[row][(tableColumn?.identifier)!]! )
          //let sollstatusint = (sollstatus as! Int)
@@ -2970,30 +3010,35 @@ extension rDataViewController:NSTableViewDataSource, NSTableViewDelegate
         // let result = tableView.makeView(withIdentifier:tableColumn?.identifier, owner: self) as! NSTableCellView
          //let wert = (swiftArray[row][(convertFromNSUserInterfaceItemIdentifier(tableColumn?.identifier))!])
          let wert = swiftArray[row][ident!]
-         //     print("A value: \(wert)")
+         //print("taskliste tableColumn A wert: \(wert)")
          let sub = result.subviews
          
-         let element = result.subviews[0]
-         //         print("check element A0: \(element)")
-         let knopf = element as! NSSegmentedControl
+         let element0 = result.subviews[0]
+         //print("check element A: \(element0)")
          
-         //knopf.toolTip = "Kanal waehlen"
+         let knopf = element0 as! NSSegmentedControl
+         
+         knopf.toolTip = "Kanal waehlen"
          let titelarray = swiftArray[row]["analogAtitel"]?.components(separatedBy: "\t")
          //titelarray = titelarray?[0]
-         knopf.tag = 1500 + row
+         knopf.tag = 1500 + 10*row
          let anz = Int(knopf.segmentCount)
+         //print("A: \(knopf.tag)")
          // https://stackoverflow.com/questions/38369544/how-to-convert-anyobject-type-to-int-in-swift
          let code = Int(wert!)
          let selectcode = UInt8(wert!)
-         
+         //print("taskliste tableColumn A selectcode: \(selectcode)")
          for pos in 0..<anz
          {
+            
+            knopf.setTag(knopf.tag + pos, forSegment: pos)
+            //print("A: tag for seg \(pos): \(knopf.tag(forSegment: pos))")
             if ((titelarray) != nil)
             {
-            knopf.setLabel((titelarray?[pos])!, forSegment: pos)
+               knopf.setLabel((titelarray?[pos])!, forSegment: pos)
             }
             let temp = UInt8(pos)
-            if ((selectcode! & (1<<temp)) > 0)
+            if ((selectcode! & (1<<temp)) > 0) // Taste soll aktiv sein
             {
                knopf.setSelected(true, forSegment: pos)
             }
@@ -3013,7 +3058,7 @@ extension rDataViewController:NSTableViewDataSource, NSTableViewDelegate
       }
           else if  ident == "bereich" // PopUpButton
       {
-         //let result = tableView.makeView(withIdentifier:convertToNSUserInterfaceItemIdentifier((convertFromNSUserInterfaceItemIdentifier(tableColumn?.identifier ?? <#default value#>))!), owner: self) as! NSTableCellView
+         //let result = tableView.makeView(withIdentifier:convertToNSUserInterfaceItemIdentifier((convertFromNSUserInterfaceItemIdentifier(tableColumn?.identifier ?? ()))!), owner: self) as! NSTableCellView
          let result = tableView.makeView(withIdentifier:convertToNSUserInterfaceItemIdentifier(ident!), owner: self) as! NSTableCellView
          //print("bereich")
          let sub = result.subviews
