@@ -16,17 +16,26 @@ public var lastDataRead = Data.init(count:64)
 
 
 //let DATA_START_BYTE   = 8    // erstes byte fuer Data auf USB
+let BATT_DOWN = 2.5 // V 
 let BATT_MIN = 3.0 // V 
-let BATT_MAX = 4.2 // V
+let BATT_MAX:Float = 4.2 // V
 
 let STROM_HI = 1000 // mA
 let STROM_LO = 50   // mA
 let STROM_REP = 100 // Reparaturstrom bei Unterspannung
-let TEENSYVREF:Float = 338.0 // Korrektur von Vref des Teensy: nomineller Wert ist 256 2.56V
 
-let ADC_U_FAKTOR:Float = 3.2 // reduktionsfaktor Batterie zu adc
+//Bits von loadstatus
+let BATT_MAX_BIT = 0
+let BATT_MIN_BIT = 1
+let BATT_DOWN_BIT = 2
 
-let ADC_I_FAKTOR:Float = 6.6 // reduktionsfaktor Batterie zu adc
+let TEENSYVREF:Float = 3.320 // Korrektur von Vref des Teensy3.2: nomineller Wert ist 3.32
+
+
+
+let ADC_U_FAKTOR:Float = 0.91 // reduktionsfaktor Batterie zu adc
+
+let ADC_I_FAKTOR:Float = 2.0 // reduktionsfaktor Batterie zu adc
 
 
 // Bits fuer DEVICE_BYTE (byte auf 0 gesetzt)
@@ -93,6 +102,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    // Variablen
    var usbstatus: __uint8_t = 0
    
+   var loadstatus:UInt8 = 0
+   
    var usb_read_cont = false; // kontinuierlich lesen
    var usb_write_cont = false; // kontinuierlich schreiben
    
@@ -155,6 +166,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
    // buffer
    var taskcode:Int = 0
+   
+   var maxY:Float = 1000.0
    
    var analogfloatarray:[Float] = Array(Array(repeating:0.0,count:10))
    var devicefloatarray:[[Float]] = Array(repeating:Array(repeating:0.0,count:10),count:6)
@@ -292,9 +305,6 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
 
    let DEVICE_BYTE = 0
 
-   //let CHANNEL = 2
-
-
    let BATT_MIN = 2.8
 
 
@@ -344,7 +354,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
    
    @IBOutlet  weak  var codeFeld: NSTextField!
-   
+   @IBOutlet  weak  var SpannungFeld_A: NSTextField!
+   @IBOutlet  weak  var SpannungFeld_B: NSTextField!
+
    
    @IBOutlet  weak  var data0: NSTextField!
    @IBOutlet  weak  var stromMFeld: NSTextField!
@@ -566,6 +578,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
 
       self.datagraph.setMajorteileY(majorteileY: mayorteiley)
       
+      
       var lineindex=0
       for var deviceline in swiftArray
       {
@@ -573,6 +586,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          {
             swiftArray[lineindex]["device"] = devicearray[lineindex]
             swiftArray[lineindex]["deviceID"] = String(lineindex)
+            
          }
          lineindex += 1
       }
@@ -629,7 +643,6 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       // MARK: - taskTab
  //     taskTab.selectTabViewItem(withIdentifier: "data")
       let ident = taskTab.selectedTabViewItem?.identifier
-      let datatabsubviews = taskTab.tabViewItem(at:0).view?.subviews 
       var ordinateframe:NSRect = NSZeroRect
       ordinateframe.size.width = 28
       ordinateframe.size.height = datagraph.frame.size.height
@@ -656,7 +669,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          dataordinate.wantsLayer = true
          let color : CGColor = CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
          dataordinate.layer?.backgroundColor = color
-
+         
          
          ordinateArray.append(dataordinate)
          
@@ -664,7 +677,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          ordinateFeldArray[nr] = ordinateframe
          ordinateframe.origin.x -= ordinateoffsetx
+         
+         self.datagraph.setDeviceMajorteileY(pos:nr, teile:Int(swiftArray[nr]["majorteiley"]!)!)
+         
       }
+      let datatabsubviews = taskTab.tabViewItem(at:0).view?.subviews 
+
       ordinateFeldArray[3] = ordinateframe
       
       let ordinatebgfarbe:NSColor  = NSColor(red: (0.0), green: (0.0), blue: (0.0), alpha: 0.0)
@@ -945,6 +963,17 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          teensy.write_byteArray[TAKT_HI_BYTE] = UInt8((integerwahl! & 0xFF00)>>8)
          
          /*
+          let BATT_DOWN = 2.5 // V 
+          let BATT_MIN = 3.0 // V 
+          let BATT_MAX = 4.2 // V
+
+          let STROM_HI = 1000 // mA
+          let STROM_LO = 50   // mA
+          let STROM_REP = 100 // Reparaturstrom bei Unterspannung
+
+          */
+          
+         /*
          print("report_start_ladung kanalstatus:")
          for  kan in 0..<swiftArray.count
          {
@@ -1025,7 +1054,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          self.datagraph.initGraphArray()
          self.datagraph.setStartsekunde(startsekunde:self.tagsekunde())
-         self.datagraph.setMaxY(maxY: 100)
+         self.datagraph.setMaxY(maxY: Int(maxY))
          self.datagraph.setDisplayRect()
          
          self.usb_read_cont = (self.cont_read_check.state.rawValue == 1) // cont_Read wird bei aktiviertem check eingeschaltet
@@ -1424,6 +1453,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          TaskListe.reloadData()
          
       // 
+      //MARK: TEENSY_DATA
       case TEENSY_DATA: // Data vom Teensy
         // print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
          //print("code ist TEENSY_DATA masterstatus: \(masterstatus)")
@@ -1513,7 +1543,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
            // print("deviceindex: \(deviceindex) devicelinie: \(devicelinie)") 
             let device = devicelinie["device"]!
             let analog = devicelinie["A"]! // Tastenstatus Kanaele           
-            //print ("deviceindex: \(deviceindex) analog: \(analog)")
+            print ("deviceindex: \(deviceindex) analog: \(analog)")
             //let devicecode = UInt8(deviceindex)
             let oldstatus = Int(swiftArray[deviceindex]["on"]!) // bisheriger status, nur update wenn changed
             //print("oldstatus: \(oldstatus) ")
@@ -1566,12 +1596,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let U_M = U_M_LO | (U_M_HI<<8)
          
          //print("")
-         let U_M_float = Float(U_M) 
+         let U_M_float = Float(U_M) // weiterverwendet
          //let U_M_norm = U_M_float*0xFF/1023 // Normiert auf 0xFF
-         let U_M_norm = U_M_float/1023
+         let U_M_norm = U_M_float/1023 // nicht verwendet
      //    Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
         
-         
+         print("\n***\n")
          //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
 //         print("TEENSY_DATA U_M: \(U_M) U_M_float: \(U_M_float) U_M_norm: \(U_M_norm)")
          
@@ -1580,7 +1610,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
  
          let U_O = U_O_LO | (U_O_HI<<8)
          let U_O_float = Float(U_O) 
-         let U_O_norm = U_O_float*0xFF/1023 // Normiert auf 0xFF
+         print("Spannung O: \(U_O)")
+    //     let U_O_norm = U_O_float*0xFF/1023 // Normiert auf 0xFF
          //Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
          //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
 //         print("TEENSY_DATA O_M: \(U_O) O_O_float: \(U_O_float) U_O_norm: \(U_O_norm)")
@@ -1589,24 +1620,24 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          // Strom
          let I_A_LO = UInt16(teensy.read_byteArray[STROM_A_L_BYTE  + DATA_START_BYTE])
          let I_A_HI = UInt16(teensy.read_byteArray[STROM_A_H_BYTE  + DATA_START_BYTE])
-         
+         print("TEENSY_DATA Strom  I_A_LO: \(I_A_LO) I_A_HI: \(I_A_HI) ")
          let I_A = I_A_LO | (I_A_HI<<8)
-         print("Strom A: \(I_A)")
+         print("Strom: \(I_A)")
          stromMFeld.integerValue = Int(I_A)
          let I_A_float = Float(I_A)
-         
+         print("Strom float: \(I_A_float)")
          // Temperatur SOURCE
          let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
          let Temp_Source_HI = UInt16(teensy.read_byteArray[TEMP_SOURCE_H_BYTE  + DATA_START_BYTE])
          let Temp_Source = Temp_Source_LO | (Temp_Source_HI<<8)
-         print("Temp_Source: \(Temp_Source)")
+ //        print("Temp_Source: \(Temp_Source)")
          TempSourceFeld.integerValue = Int(Temp_Source)
                
          // Temperatur BATT
          let Temp_Batt_LO = UInt16(teensy.read_byteArray[TEMP_BATT_L_BYTE  + DATA_START_BYTE])
          let Temp_Batt_HI = UInt16(teensy.read_byteArray[TEMP_BATT_H_BYTE  + DATA_START_BYTE])
          let Temp_Batt = Temp_Batt_LO | (Temp_Batt_HI<<8)
-         print("Temp_Batt: \(Temp_Batt)")
+ //        print("Temp_Batt: \(Temp_Batt)")
          TempBattFeld.integerValue = Int(Temp_Batt)
           
          
@@ -1618,7 +1649,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          messungDataArray.append(temparray) //Array der Daten von readbytearray von DATA_START_BYTE an
          
          messungfloatarray[0][DIAGRAMMDATA_OFFSET + 0] = U_M_float  // DIAGRAMMDATA_OFFSET 4
-         
+         messungfloatarray[0][DIAGRAMMDATA_OFFSET + 1] = U_O_float  // DIAGRAMMDATA_OFFSET 4
+
          messungfloatarray[1][DIAGRAMMDATA_OFFSET + 0] = I_A_float
          
          
@@ -1635,9 +1667,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          var tempwerte = [Float] ( repeating: 0.00, count: 9 )     // eine Zeile mit messung-zeit und 8 floats
          tempwerte[0] = Float(diff) // Abszisse
          // Array mit werten fuer einen Datensatz im Diagramm
-         var werteArray = [[Float]](repeating: [0.0,0.0,1.0,0.0], count: 9 ) // Data mit wert, deviceID, sortenfaktor anzeigefaktor
+         var werteArray = [[Float]](repeating: [0.0,0.0,1.0,0.0,0.0,0.0], count: 9 ) // Data mit wert, deviceID, sortenfaktor anzeigefaktor,majorteile, minorteile
          // wertearray: [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
-         werteArray[0] = [Float(tempzeit),1.0,1.0,1.0] // Abszisse 
+         werteArray[0] = [Float(tempzeit),1.0,1.0,1.0,1.0,1.0] // Abszisse 
          
          //Index fuer Werte im Diagramm
          var diagrammkanalindex = 1    // index 0 ist ordinate (zeit)                                   // Index des zu speichernden Kanals
@@ -1651,26 +1683,33 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let spannungid = datacode & (1<<SPANNUNG_ID)
          let stromid = datacode & (1<<STROM_ID)
          let tempid = datacode & (1<<TEMP_ID)
-         print("datacode: \(datacode) spannungid: \(spannungid) stromid: \(stromid) tempid: \(tempid)")
+ //        print("datacode: \(datacode) spannungid: \(spannungid) stromid: \(stromid) tempid: \(tempid)")
          
          //MARK: neu
          for devicedata in swiftArray
          {
             if (devicedata["on"] == "1") // device vorhanden
             {
+               //print("devicedata: \(devicedata)")
                let segmentstatus = UInt8(devicedata["A"]!)!
                let dev = String(devicedata["device"] ?? "dev")
                //print("devicedata: \(devicedata) ")
                let deviceID = Int(devicedata["deviceID"]!)
+               let mty = devicedata["majorteiley" ] 
+               let numberFormatter = NumberFormatter()
+               let number = numberFormatter.number(from: mty ?? "1")
+               let deviceMajorTeileY = number?.intValue
+
                //print("deviceID: \(deviceID) device: \(dev) ")
                let messungfloatzeilenarray:[Float] = messungfloatarray[deviceID ?? 0]     
-               print("messungfloatzeilenarray dev: \(dev): \(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0]) ")
+               print("messungfloatzeilenarray dev: \(dev): \(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0]) raw devMayorTeileY: \(deviceMajorTeileY)")
                //print(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0])
                /*
                 Werte fuer Diagramm auf 100 normieren (MaxY)
                 
                 */
                // Kanaele des device abfragen
+               
                for kanal in 0..<4
                {
                   SortenFaktor = 1
@@ -1694,23 +1733,77 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                      case 0: // Spannung
                         switch kanal
                         {
-                        case 0,1: // 5V
-                       
+                        case 0: // 5V
                            stellen = 2
-                           if (kanal == 0 || kanal == 2) // 5V, geteilt durch 2
+                           if (kanal == 0 || kanal == 1) // 5V, 
                            {
-                              //print("kanal 0,2")
+                              print("Spannung kanal \(kanal) wert: \(wert)")
                               //wert_norm = wert * 340 / 1024 //Ref 3.
-                              wert_norm = wert * TEENSYVREF / 1024 // Spannung am ADC 
+                              let ADC_Spannung = wert * TEENSYVREF / 1024  // Spannung am ADC 
+                              let Eff_Spannung = ADC_Spannung * 1.45 //Umrechnung reale Spannung zu ADC-Eingangsspannung
+                              //SpannungFeld_A.floatValue = 2*ADC_Spannung // ADC-Spannung ist halbiert
+                              SpannungFeld_A.floatValue = Eff_Spannung // ADC-Spannung ist halbiert
+
+                              
+                              //wert_norm = wert * ADC_U_FAKTOR
+                              wert_norm = Eff_Spannung
+                              
+                              if wert_norm > BATT_MAX
+                              {
+                                 wert_norm = BATT_MAX
+                                 loadstatus |= (1<<BATT_MAX_BIT)
+                                 
+                              }
+                              /*
+                              let BATT_DOWN = 2.5 // V 
+                              let BATT_MIN = 3.0 // V 
+                              let BATT_MAX = 4.2 // V
+                              */
                               
                               AnzeigeFaktor = 1.0 // Anzeige strecken
-                              SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
+                              SortenFaktor = 1 // Anzeige in Diagramm durch Sortenfaktor teilen: 
                               if (kanal == 2)
                               {
                                  //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
                               }
                               
                            }
+                        case 1:
+                           stellen = 2
+                           if (kanal == 0 || kanal == 1) // 5V, 
+                           {
+                              print("Spannung kanal \(kanal) wert: \(wert)")
+                              //wert_norm = wert * 340 / 1024 //Ref 3.
+                              let ADC_Spannung = wert * TEENSYVREF / 1024  // Spannung am ADC 
+                              let Eff_Spannung = ADC_Spannung * 1.45 //Umrechnung reale Spannung zu ADC-Eingangsspannung
+                              //SpannungFeld_B.floatValue = 2*ADC_Spannung // ADC-Spannung ist halbiert
+                              SpannungFeld_B.floatValue = Eff_Spannung // ADC-Spannung ist halbiert
+
+                              
+                              //wert_norm = wert * ADC_U_FAKTOR
+                              wert_norm = Eff_Spannung
+                              
+                              if wert_norm > BATT_MAX
+                              {
+                                 wert_norm = BATT_MAX
+                                 loadstatus |= (1<<BATT_MAX_BIT)
+                                 
+                              }
+                              /*
+                              let BATT_DOWN = 2.5 // V 
+                              let BATT_MIN = 3.0 // V 
+                              let BATT_MAX = 4.2 // V
+                              */
+                              
+                              AnzeigeFaktor = 1.0 // Anzeige strecken
+                              SortenFaktor = 1 // Anzeige in Diagramm durch Sortenfaktor teilen: 
+                              if (kanal == 2)
+                              {
+                                 //   print("\ndata kanal: \t\(kanal)\twert_norm:\t \(wert_norm)") 
+                              }
+                              
+                           }
+                        
                         
                         case 2: // PT100
                            wert_norm = wert
@@ -1734,17 +1827,16 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                            //print("***        Strom Kanal 0 wert:\(wert)")
                           
                            stellen = 2
-                           
                               //print("kanal 0,1")
                               //wert_norm = wert * 340 / 1024 //Ref 3.
-                              wert_norm = wert * TEENSYVREF / 1024 * ADC_I_FAKTOR// Spannung am shuntwiderstand aus Diffverstärker, normiert auf 1000mA
+                           let Strom = wert * TEENSYVREF / 1024 // Spannung am shuntwiderstand aus Diffverstärker, 
+                           wert_norm = wert / 1000 //* ADC_I_FAKTOR// 
                               
-                              stromOFeld.floatValue = wert_norm
+                           stromOFeld.floatValue = wert_norm
                               
                            AnzeigeFaktor = 1.0 // Anzeige strecken
-                              SortenFaktor = 100 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
-                              
-                                 print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
+                              SortenFaktor = 1 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
+                              print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
                               
                               
                            
@@ -1773,7 +1865,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                         {
                            //print("kanal 0,2")
                            wert_norm = wert / 0x1000 * 4.096 * 20
-                           AnzeigeFaktor = 2.0 // Anzeige strecken
+                           AnzeigeFaktor = 1.0 // Anzeige strecken
                            SortenFaktor = 10 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
                            if (kanal == 2)
                            {
@@ -1793,10 +1885,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                         break
                      }// switch device
                      
-                     print("\t\twert_norm: \t\(wert_norm)")
+                     print("\t\tdeviceID: \(deviceID)wert_norm: \t\(wert_norm) diagrammkanalindex: \(diagrammkanalindex)")
                      tempwerte[diagrammkanalindex] = wert_norm
-                     werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID ?? 0), SortenFaktor, AnzeigeFaktor]
-                  /*
+                     werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID ?? 0), SortenFaktor, AnzeigeFaktor, Float(deviceMajorTeileY ?? 0)]
+                 
+                     /*
                      if deviceID == 1
                      {
                         print("werteArray: \(werteArray)")
@@ -1811,8 +1904,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                      
                      deviceDatastring = deviceDatastring  + "\t"  +  String(format:"%.\(stellen)f", wert_norm) 
                      diagrammkanalindex += 1
-                     //print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
-                     //print("deviceDatastring A: \(deviceDatastring)")
+                     print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
+                     print("deviceDatastring: \(deviceDatastring)")
                      //print("tempinputDataFeldstring A: \(tempinputDataFeldstring)")
                   } // if (analog & (1<<kanalint) > 0)
                   
@@ -1823,10 +1916,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          }// end swiftArray.count
          
    
-         //MARK: TEENSY_DATA devicedata == 0n END 
          
       //https://stackoverflow.com/questions/40478728/appending-text-to-nstextview-in-swift-3
-
+         print("werteArray: ***************\n\(werteArray)")
+         
+         print("*************** ")
          // MARK:*** setWerteArray:
          self.datagraph.setWerteArray(werteArray:werteArray,  nullpunktoffset: NullpunktOffset)
          
@@ -2221,7 +2315,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                let messungfloatzeilenarray:[Float] = messungfloatarray[Int(devicenummer)]                                 // Array mit float-daten des device
                //print("device: \(deviceID)   messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
                //print("device: \(String(describing: devicedata["device"]!)) analogtasten: \(String(describing: analog)) eingang messungfloatzeilenarray: \(messungfloatzeilenarray)")
-               
+               print("analog: \t\(analog)")
                // Kanaele des device abfragen
                for kanal in 0..<4
                {
@@ -2231,6 +2325,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                   let kanalint = UInt8(kanal)
                   if ((analog & (1<<kanalint) > 0) ) // kanal aktiv
                   {
+                     print("kanal: \t\(kanal) ist aktiv")
                      /*
                       let messungfloatzeilenarray:[Float] = messungfloatarray[device]  // Array mit float-daten des device
                       print("device: \(deviceID) kanal: \(kanal)  messungfloatzeilenarray:\t* \(messungfloatzeilenarray)*")
@@ -2446,12 +2541,13 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                      //print("\t\twert_norm: \t\(wert_norm)")
                      tempwerte[diagrammkanalindex] = wert_norm
                      werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
-                     print("DEVICE_BYTE \(deviceID)  werteArray: ")
+                     //print("DEVICE_BYTE \(deviceID)  werteArray: ")
+                     /*
                      for zeile in werteArray
                      {
                           print("\(zeile)")
                      }
-                     
+                     */
                      // Zeile im Textfeld als string aufbauen
                      let stellenstring = "%.0\(stellen)f"
                      tempinputDataFeldstring = tempinputDataFeldstring + "\t" +  String(format:"%.\(stellen)f", wert_norm) // Eintrag in inputDataFeld

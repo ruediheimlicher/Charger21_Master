@@ -25,9 +25,9 @@ class DataPlot: NSView
    
    var linienfarbeArray:[[NSColor]] = [[NSColor]](repeating: [NSColor](repeating:NSColor.gray,count:16) ,count: 16 )
    
-   var wertesammlungarray = [[[Float]]]()
+   var wertesammlungarray = [[[Int]]]()
    
-   
+   var majorTeileArray:[Int]! = [Int](repeating:1,count:4)
    var diagrammfeld:CGRect = CGRect.zero
    
    ///var Abszisse_A:Abszisse
@@ -301,6 +301,12 @@ class DataPlot: NSView
    {
       Vorgaben.MajorTeileY = majorteileY
    }
+   
+   open func setDeviceMajorteileY(pos:Int, teile:Int)
+   {
+      majorTeileArray[pos] = teile
+   }
+
 
    open func setMinorteileY(minorteileY:Int)
    {
@@ -486,8 +492,10 @@ class DataPlot: NSView
             let rawWert = graphZahl * SortenFaktor
             tempKanalDatenDic[String(i)] = InputZahl // input mit key i
             let DiagrammWert = rawWert * AnzeigeFaktor
-            //Swift.print("setWerteArray: Kanal: \(i) InputZahl:  \(InputZahl) graphZahl:  \(graphZahl) rawWert:  \(rawWert) DiagrammWert:  \(DiagrammWert)");
+            
+            Swift.print("***    setWerteArray: Kanal: \(i) InputZahl:  \(InputZahl) graphZahl:  \(graphZahl) rawWert:  \(rawWert) DiagrammWert:  \(DiagrammWert)");
             FaktorArray[i] = 1/FaktorY //(Vorgaben.MaxY - Vorgaben.MinY)/(self.frame.size.height-(Geom.randoben + Geom.randunten))
+            
             neuerPunkt.y = neuerPunkt.y + DiagrammWert;
             
             tempKanalDatenDic["np\(i)"] = neuerPunkt.y // ordinate mit key np1, np2 ...
@@ -555,7 +563,7 @@ class DataPlot: NSView
  //     {
         // Swift.print("*\(zeile)*");
  //     }
-       
+      Swift.print("majorTeileArray: \(majorTeileArray)")
       //wertesammlungarray.append(werteArray)
       var AnzeigeFaktor:CGFloat = 1.0 //= maxSortenwert/maxAnzeigewert;
       var SortenFaktor:CGFloat = 1.0
@@ -566,9 +574,9 @@ class DataPlot: NSView
       FaktorX = 1.0
       //         let FaktorY:CGFloat = (self.frame.size.height-(Geom.randoben + Geom.randunten))/Vorgaben.MaxY		// Umrechnungsfaktor auf Diagrammhoehe
       
-      let FaktorY:CGFloat = feld.size.height / Vorgaben.MaxY  
-      
-      //Swift.print("ordinate feld height: \(feld.size.height) Vorgaben.MaxY: \(Vorgaben.MaxY) FaktorY: \(FaktorY) ")
+      //let FaktorY:CGFloat = feld.size.height / CGFloat(Vorgaben.MajorTeileY ) 
+   
+  //    Swift.print("ordinate feld height: \(feld.size.height) Vorgaben.MaxY: \(Vorgaben.MaxY)")
       
       
       //Swift.print("frame height: \(self.frame.size.height) FaktorY: \(FaktorY) ")
@@ -601,19 +609,24 @@ class DataPlot: NSView
       {
          if (i < werteArray.count)
          {
-               Swift.print("i: \(i) werteArray: \(werteArray)")
+               //Swift.print("i: \(i) werteArray: \(werteArray)")
             // werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID), SortenFaktor, AnzeigeFaktor]
+            
             AnzeigeFaktor = CGFloat(werteArray[i+1][3])
         //    Swift.print("i: \(i) AnzeigeFaktor: \(AnzeigeFaktor)")
             if (Int(AnzeigeFaktor) > 0)
             {
+               deviceID = CGFloat(werteArray[i+1][1]) // ID des device
+               let majorteiley = CGFloat(majorTeileArray[Int(deviceID)])
+               
+               let FaktorY:CGFloat = feld.size.height / majorteiley 
                
                neuerPunkt.y = feld.origin.y
               // Swift.print("i: \(i) werteArray 0: \(werteArray[0]) neuerPunkt.x nach: \(neuerPunkt.x) neuerPunkt.y: \(neuerPunkt.y)")
                
                let InputZahl = CGFloat(werteArray[i+1][0])	// Input vom teensy, 0-255. Wert an 0 ist abszisse
                
-               deviceID = CGFloat(werteArray[i+1][1]) // ID des device
+               
                
                
                tempKanalDatenDic["dev\(i)"] = deviceID // deviceID mitgeben
@@ -621,19 +634,18 @@ class DataPlot: NSView
                
                SortenFaktor = CGFloat(werteArray[i+1][2])
                tempKanalDatenDic["sf\(i)"] = SortenFaktor // Sortenfaktor mitgeben
-               
-               
-               
+
                tempKanalDatenDic["af\(i)"] = AnzeigeFaktor // Anzeigefaktor mitgeben
                
                tempKanalDatenDic["rawy\(i)"] = InputZahl // Input vom teensy, 0-255, rawy1, rawy2, ...
                
                
                let graphZahl = CGFloat(InputZahl - Vorgaben.MinY) * FaktorY 							// Red auf reale Diagrammhoehe
-               
+               Swift.print("***    Kanal: \(i) InputZahl:  \(InputZahl) graphZahl:  \(graphZahl)  FaktorY: \(FaktorY)");
+
                //Swift.print("i: \t\(i) \tInputZahl: \t\(InputZahl) \tgraphZahl: \t\(graphZahl)")
                
-               let rawWert = graphZahl //* SortenFaktor
+               let rawWert = graphZahl 
                
                tempKanalDatenDic[String(i)] = InputZahl / SortenFaktor// input mit key i. Gibt numerische Anzeige im Diagramm
                let DiagrammWert = rawWert * AnzeigeFaktor
@@ -1327,7 +1339,7 @@ extension DataPlot
          if (tempanzeigefaktor != nil)
          {
             let tempdeviceID = Int((lastdata?["dev\(i)"])!)
-            var stellenzahl = 1
+            var stellenzahl = 2
 
             let tempsortenfaktor = (lastdata?["sf\(i)"])
             if (tempsortenfaktor != nil)
