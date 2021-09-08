@@ -18,10 +18,22 @@ class DataPlot: NSView
    var Device:String = "home"
    var DatenDicArray:[[String:CGFloat]]! = [["":0.0]]
    var DatenArray:[[CGFloat]]! = [[]]
+   
+   // Array mit Datenfeldern(Bezeichnung) fuer datenlinien
+   var datenfeldarray:[NSTextField]! = []
+   
+   // Array mit Wertfeldern(Wert) fuer datenlinien
+   var datenwertfeldarray:[NSTextField]! = []
+   
+   var datentitelarray = [String](repeating: "", count: 16)
+   
    var GraphArray = [CGMutablePath]( repeating: CGMutablePath(), count: 16 )
    var KanalArray = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
    var FaktorArray:[CGFloat]! = [CGFloat](repeating:0.5,count:16)
    var DatafarbeArray:[NSColor]! = [NSColor](repeating:NSColor.gray,count:16) // Strichfarbe im Diagramm
+   
+   // Legende
+   var datenlegende:rDatenlegende
    
    var linienfarbeArray:[[NSColor]] = [[NSColor]](repeating: [NSColor](repeating:NSColor.gray,count:16) ,count: 16 )
    
@@ -89,14 +101,65 @@ class DataPlot: NSView
    
    required init(coder: NSCoder)
    {
-      //Swift.print("DataPlot coder")
+      Swift.print("DataPlot coder")
   //    Abszisse_A = Abszisse.init(coder:coder)
+      datenlegende = rDatenlegende.init(coder: coder)
       
       super.init(coder: coder)!
+      
       diagrammfeld = DiagrammRect(rect:  self.bounds)
       
-   }
+      for i in 0...12
+      {
+         var tempRect:NSRect = NSMakeRect(0,0,30,16)
+         
+         // Array mit Datenfeldern(Bezeichnung) fuer datenlinien
+         //var datenfeldarray:[[String:CGFloat]]! = [["":0.0]]
+         let datenfont:NSFont = NSFont(name: "HelveticaNeue", size: 9)!
+         var tempDatenFeld:NSTextField = NSTextField.init(frame: tempRect) 
+         tempDatenFeld.isEditable = false
+         tempDatenFeld.isSelectable = false
+         tempDatenFeld.isBordered = false
+         tempDatenFeld.drawsBackground = false
+         tempDatenFeld.font = datenfont
+         tempDatenFeld.alignment = NSTextAlignment.left
+         tempDatenFeld.stringValue = ""
+         self.addSubview(tempDatenFeld)
+         datenfeldarray.append(tempDatenFeld)
+         
+ 
+         // Array mit Wertfeldern(Wert) fuer datenlinien
+         var tempWertFeld:NSTextField = NSTextField.init(frame: tempRect) 
+         tempRect.origin.x += 1
+         tempWertFeld.isEditable = false
+         tempWertFeld.isSelectable = false
+         tempWertFeld.isBordered = false
+         tempWertFeld.drawsBackground = false
+         tempWertFeld.font = datenfont
+         tempWertFeld.alignment = NSTextAlignment.left
+         tempWertFeld.stringValue = ""
+         self.addSubview(tempWertFeld)
+         datenwertfeldarray.append(tempWertFeld)
+
+         datentitelarray[0] = "U_M"
+         datentitelarray[1] = "U_O"
+         datentitelarray[2] = "I_A"
+
+         NotificationCenter.default.addObserver(self, selector:#selector(StartAktion(_:)),name:NSNotification.Name(rawValue: "data"),object:nil)
+      } // for i
+      
+      
+      
+   } // init coder
    
+   @objc func StartAktion(_ notification:Notification) 
+   {
+      let info = notification.userInfo
+      //let ident:String = info?["ident"] as! String  // 
+      print("StartAktion info:\t \(info)")
+      
+   }
+
    open func diagrammDataDicFromLoggerData(loggerdata:String) ->[[String:CGFloat]]
    {
       var LoggerDataDicArray :[[String:CGFloat]]! = [[:]]
@@ -1185,13 +1248,15 @@ extension DataPlot
       {
          return
       }
+      let ru = datenlegende.randunten
+      Swift.print("randunten: \(ru)")
       //Swift.print("GraphArray: \n\(GraphArray)")
       
       var path = CGMutablePath()
       let red = CGColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
       let blue = CGColor(red: 0.0, green: 0.0, blue: 1.0, alpha: 1.0)
       let gray = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.6)
-      let lightgray = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.3)
+      let lightgray = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.4)
       
       
       /*
@@ -1225,7 +1290,7 @@ extension DataPlot
       //    path.addLine(to: NSMakePoint(diagrammrect.origin.x + diagrammrect.size.width, diagrammrect.origin.y + diagrammrect.size.height))
       path.closeSubpath()
       
-      context?.setLineWidth(0.4)
+      context?.setLineWidth(0.8)
       context?.setFillColor(fillColor)
       context?.setStrokeColor(borderColor)
       
@@ -1262,7 +1327,7 @@ extension DataPlot
             //Swift.print("red")
             context?.addPath(horizontalelinienarray[l])
             context?.setStrokeColor(lightgray)
-            context?.setLineWidth(0.3)
+            context?.setLineWidth(0.4)
             context?.drawPath(using: .stroke)
 
          }
@@ -1340,16 +1405,16 @@ extension DataPlot
          {
             let tempdeviceID = Int((lastdata?["dev\(i)"])!)
             var stellenzahl = 2
-
+            
             let tempsortenfaktor = (lastdata?["sf\(i)"])
             if (tempsortenfaktor != nil)
             {
                
-            if (Float(tempsortenfaktor!) >= 10.0) // division durch 10, mehr Stellen angeben
-            {
-               stellenzahl = 2
+               if (Float(tempsortenfaktor!) >= 10.0) // division durch 10, mehr Stellen angeben
+               {
+                  stellenzahl = 2
+               }
             }
-         }
             //Swift.print("GraphArray not Empty")
             
             //GraphArray[0].addLine(to: NSMakePoint(diagrammrect.origin.x + diagrammrect.size.width, diagrammrect.origin.y + diagrammrect.size.height))
@@ -1378,6 +1443,8 @@ extension DataPlot
                
                //https://www.hackingwithswift.com/example-code/core-graphics/how-to-draw-a-text-string-using-core-graphics
                let p = GraphArray[i].currentPoint
+               
+               
                //Swift.print("diagramm p x: \(p.x)")
                
                //         Swift.print("qlastx: \(qlastx)  DatenDicArray: \n\(DatenDicArray)")
@@ -1397,8 +1464,8 @@ extension DataPlot
                let attrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue", size: 10)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle ,convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): DatafarbeArray[i]]
                tempWertString.draw(with: CGRect(x: p.x + 4, y: p.y-6, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
             } // if wert = lastdata
-           } // if Anzeigefaktor != nil 
-         } // for i in GraphArray.count
+         } // if Anzeigefaktor != nil 
+      } // for i in GraphArray.count
          
          
          
@@ -1445,6 +1512,8 @@ extension DataPlot
    
    func drawDiagrammInContext(context: CGContext?)
    {
+      
+      datenlegende.setVorgabendic(vorgabendic: ["randunten" : 12])
       context!.setLineWidth(0.6)
       //let diagrammRect = PlotRect()
       let randfarbe =  CGColor.init(red:1.0,green: 0.0, blue: 0.0,alpha:1.0)

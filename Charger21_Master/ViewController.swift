@@ -849,7 +849,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          senderfolg = Int(teensy.send_USB())
       }
       StromIndikator.integerValue = Int(strom)
-      print("reportStromSlider senderfolg: \(senderfolg)")
+      //print("reportStromSlider senderfolg: \(senderfolg)")
    }//
 
    
@@ -1030,7 +1030,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          //print("tabstops: \(paragraphStyle.tabStops)")
          
          let tempstring = "Messung tagsekunde: \(zeit)\n"
-         //         inputDataFeld.string = "Messung tagsekunde: \(zeit)\n"
+         //inputDataFeld.string = "Messung tagsekunde: \(zeit)\n"
          
          let attrdatatext = NSMutableAttributedString(string: tempstring)
          let datatextRange = NSMakeRange(0, tempstring.count)
@@ -1512,7 +1512,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             
             devicestatus = 0x01 // teensy ist immer aktiv. Sonst wird inputDatafeld nicht geschrieben (devicestatus == callback_status)
             // String beginnen
-            //      inputDataFeldstring = messungnummerFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
+                  inputDataFeldstring = messungnummerFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
             
             blockcounterFeld.integerValue = Int(blockcounter)
          }
@@ -1520,7 +1520,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             // von MESSUNG_DATA
     //        print("messungnummer: \(messungnummer)\tdevicenummer: \(devicenummer)")
            // print("rawdatazeile read_byteArray. Data ab byte 0")
-         rawdataarray.append(rawdatazeile)
+         //rawdataarray.append(rawdatazeile)
          
          
          if (devicenummer == 0)
@@ -1673,11 +1673,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          //Index fuer Werte im Diagramm
          var diagrammkanalindex = 1    // index 0 ist ordinate (zeit)                                   // Index des zu speichernden Kanals
-         var tempinputDataFeldstring = messungnummerFeld.stringValue + "\t delta: "  + String(tagsekunde()-MessungStartzeit) + "\t"
+         var tempinputDataFeldstring = messungnummerFeld.stringValue   + "\t" + String(tagsekunde()-MessungStartzeit) + "\t"
          
          // MESSUNG_DATA for device in 0..<anzdevice
          
-         var deviceDatastring = ("\(devicenummer) \t")
+         //var deviceDatastring = ("\(devicenummer) \t")
+         var deviceDatastring = tempinputDataFeldstring + " \t"
          let devicedata = swiftArray[Int(devicenummer)]
          
          let spannungid = datacode & (1<<SPANNUNG_ID)
@@ -1897,15 +1898,15 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
  */
                      // Zeile im Textfeld als string aufbauen
                      let stellenstring = "%.0\(stellen)f"
-                     tempinputDataFeldstring = tempinputDataFeldstring + "\t" +  String(format:"%.\(stellen)f", wert_norm) // Eintrag in inputDataFeld
+                     tempinputDataFeldstring = tempinputDataFeldstring +  String(format:"%.\(stellen)f", wert_norm) + "\t" // Eintrag in inputDataFeld
                      //let formatstring = "%.\(stellen)f" as NSString
                      // let str = String(format:"%d, %f, %ld", INT_VALUE, FLOAT_VALUE, DOUBLE_VALUE)
                      //tempinputDataFeldstring = tempinputDataFeldstring + "\t" + (NSString(format:formatstring, wert_norm) as String)
                      
                      deviceDatastring = deviceDatastring  + "\t"  +  String(format:"%.\(stellen)f", wert_norm) 
                      diagrammkanalindex += 1
-                     print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
-                     print("deviceDatastring: \(deviceDatastring)")
+                     //print("kanal: \(kanal) wert: \(wert) wert_norm: \(wert_norm)")
+                     //print("deviceDatastring: \(deviceDatastring)")
                      //print("tempinputDataFeldstring A: \(tempinputDataFeldstring)")
                   } // if (analog & (1<<kanalint) > 0)
                   
@@ -1915,12 +1916,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             } // on = 1
          }// end swiftArray.count
          
-   
+         print("deviceDatastring: \(deviceDatastring)")
+         print("tempinputDataFeldstring: \(tempinputDataFeldstring)")
          
+         inputDataFeld.string = inputDataFeld.string + tempinputDataFeldstring + "\n"
       //https://stackoverflow.com/questions/40478728/appending-text-to-nstextview-in-swift-3
-         print("werteArray: ***************\n\(werteArray)")
+         //print("werteArray: ***************\n\(werteArray)")
          
-         print("*************** ")
+         //print("*************** ")
          // MARK:*** setWerteArray:
          self.datagraph.setWerteArray(werteArray:werteArray,  nullpunktoffset: NullpunktOffset)
          
@@ -2413,7 +2416,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                   
                } // for kanal
                
-               //inputDataFeld.string = inputDataFeld.string! + String(messungnummer) +    tempinputDataFeldstring + "\t"
+               inputDataFeld.string = inputDataFeld.string + String(messungnummer) +    tempinputDataFeldstring + "\t"
                //print("TEENSY werteArray: ")
                for zeile in werteArray
                {
@@ -2562,12 +2565,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                   } // if (analog & (1<<kanalint) > 0)
                   
                } // for kanal
-               //inputDataFeld.string = inputDataFeld.string! + String(messungnummer) +    tempinputDataFeldstring + "\t"
+               inputDataFeld.string = inputDataFeld.string + String(messungnummer) +    tempinputDataFeldstring + "\t"
                
             } // if on
             
          }
-         
          
          break
       //MARK: end MESSUNG_DATA
