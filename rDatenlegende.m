@@ -115,15 +115,17 @@ if ([vorgabendic objectForKey:@"randunten"])
       {
          minposition = tempwert;
          // Cluster fertig, neuen Array fuer eventuellen naechsten Cluster anfuegen
+        
          if ([[ClusterArray lastObject]count]) // der letzte Cluster hatte Elemente
          {
             // im letzten Element abstandnach einsetzen: legendeposition - legendeposition des letzten Elements
             float lastlegendeposition = [[[[ClusterArray lastObject]lastObject]objectForKey:@"legendeposition"]floatValue];
+            
             [[[ClusterArray lastObject]lastObject]setObject:[NSNumber numberWithFloat:legendeposition-lastlegendeposition]forKey:@"abstandnach"];
             
             [ClusterArray addObject:[[NSMutableArray alloc]initWithCapacity:0]];
             clusterindex ++;
-         }
+         } // der letzte Cluster hatte Elemente
          
       }
       distanz = legendeposition-distanz; // Bei Element 0 Abstand von 0-Linie
@@ -201,7 +203,7 @@ if ([vorgabendic objectForKey:@"randunten"])
          }
          
          
-      }
+      }// if count
       //NSLog(@"DatenLegende k: %d ClusterArray nach: %@",k,[[ClusterArray objectAtIndex:k ]description]);
    }
    //NSLog(@"DatenLegende LegendeArray nach korr: %@",[[LegendeArray valueForKey:@"legendeposition"]description]);

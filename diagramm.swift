@@ -556,7 +556,7 @@ class DataPlot: NSView
             tempKanalDatenDic[String(i)] = InputZahl // input mit key i
             let DiagrammWert = rawWert * AnzeigeFaktor
             
-            Swift.print("***    setWerteArray: Kanal: \(i) InputZahl:  \(InputZahl) graphZahl:  \(graphZahl) rawWert:  \(rawWert) DiagrammWert:  \(DiagrammWert)");
+            //Swift.print("***    setWerteArray: Kanal: \(i) InputZahl:  \(InputZahl) graphZahl:  \(graphZahl) rawWert:  \(rawWert) DiagrammWert:  \(DiagrammWert)");
             FaktorArray[i] = 1/FaktorY //(Vorgaben.MaxY - Vorgaben.MinY)/(self.frame.size.height-(Geom.randoben + Geom.randunten))
             
             neuerPunkt.y = neuerPunkt.y + DiagrammWert;
@@ -704,7 +704,7 @@ class DataPlot: NSView
                
                
                let graphZahl = CGFloat(InputZahl - Vorgaben.MinY) * FaktorY 							// Red auf reale Diagrammhoehe
-               Swift.print("***    Kanal: \(i) InputZahl:  \(InputZahl) graphZahl:  \(graphZahl)  FaktorY: \(FaktorY)");
+              // Swift.print("***    Kanal: \(i) InputZahl:  \(InputZahl) graphZahl:  \(graphZahl)  FaktorY: \(FaktorY)");
 
                //Swift.print("i: \t\(i) \tInputZahl: \t\(InputZahl) \tgraphZahl: \t\(graphZahl)")
                
@@ -1304,10 +1304,6 @@ extension DataPlot
       context?.addPath(achsenpath)
       
       let horizontalelinenfeld = self.diagrammfeld
-  //    let horizontalelinenpfad = horizontalelinen(rect:horizontalelinenfeld)
-      
-      
-   //   context?.addPath(horizontalelinenpfad)
 
       let horizontalelinienarray = horizontalelinienArray(rect:horizontalelinenfeld)
       for l in 0..<horizontalelinienarray.count
@@ -1344,21 +1340,14 @@ extension DataPlot
       ordinaterect.origin.x -= ordinatebreite
       //let ordinatefarbe = CGColor.init(red:0.0,green:0.5, blue: 0.5,alpha:1.0)
       
-      /*
-       let ordinatepath = ordinate(rect:ordinaterect)
-       // let ordinatepath = ordinate(rect:rect,linienfarbe:borderColor)
-       context?.setLineWidth(1.0)
-       context?.addPath(ordinatepath)
-       context?.setStrokeColor(ordinatefarbe)
-       //context?.setFillColor(CGColor.init(red:0x00,green: 0xFF, blue: 0xFF,alpha:1.0))
-       context?.drawPath(using: .stroke)
-       */
-      
+       
       if DatenDicArray.count < 3 
       {
          return
       }
+      
       let lastdata = DatenDicArray.last
+      //Swift.print("lastdata: \(lastdata)")
       if ((lastdata?.count == 0) )
       {
          return
@@ -1367,6 +1356,7 @@ extension DataPlot
       let lastdatax = lastdata?["x"]
       let lastdatay = lastdata?["0"]
       let lastzeit = lastdata?["time"] // Zeit ab Start Messung
+      
       /*
        var rawzeit = Double((lastdata?["time"])!)
        if (rawzeit > 0)
@@ -1387,6 +1377,96 @@ extension DataPlot
          context?.drawPath(using: .stroke)
       }
       
+      //MARK:  datenlegende
+      var legendearray:[[String:CGFloat]] = [[:]]
+      var miny:CGFloat = self.frame.size.height
+      var maxy:CGFloat = 0
+      
+      struct legendestruct:Codable
+      {
+         var wert:CGFloat
+         var index:Int
+      }
+      var structlegendearray:[legendestruct] = []
+      //var sortarray = structlegendearray.sort(by: {$0.wert > $1.wert })
+      
+      //legendearray aufbauen
+      legendearray.removeAll()
+      for k in 0...12
+      {
+         if (!(GraphArray[k].isEmpty))
+         {
+         let cp = GraphArray[k].currentPoint
+         
+         
+         var wertdic:[String:CGFloat] = [:]
+         wertdic["wert"] = cp.y
+         wertdic["index"] = CGFloat(k)
+         legendearray.append(wertdic)
+            
+         var wertstruct = legendestruct(wert: cp.y, index:k)
+         structlegendearray.append(wertstruct)  
+            
+         // Bereich bestimmen
+         miny = fmin(miny,cp.y)
+         maxy = fmax(maxy,cp.y)
+
+         // end datenlegende
+         Swift.print("diagramm cp x: \(cp.x)")
+         }
+      } // for i <12
+
+      print("miny: \(miny) maxy: \(maxy) legendearray: \(legendearray)")
+      print("legendearray unsorted: \(legendearray)")
+      legendearray = legendearray.sorted(by: { $0["wert"] ?? 0 < $1["wert"] ?? 0 })
+      print("legendearray sorted wert: \(legendearray)")
+      
+      for legendelinie  in legendearray
+      {
+         print("legendelinie index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0)")
+      }
+    
+      
+      //Swift.print("structlegendearray unsorted: \(structlegendearray)")
+      print("structlegendearray sorted wert: \(legendearray)")
+      for legendelinie  in structlegendearray
+     {
+      print("legendelinie index: \(legendelinie.index) wert: \(legendelinie.wert)")
+     }
+      if legendearray.last == [:]
+      {
+         legendearray.removeLast()
+      }
+      datenlegende.setLegendearray(legendearray: legendearray)
+ 
+       //MARK: end datenlegende
+      
+      
+      
+      legendearray = datenlegende.legendedicarray
+      
+      print("LegendeArray nach setLegendeArray: \(legendearray)")
+      
+      legendearray.sort(by: { ($0["index"] ?? 0) < ($1["index"] ?? 0) })
+      
+      print("legendearray sorted index: \(legendearray)")
+      
+      legendearray[0]["wert"] = 0
+      
+      var legendeindex:Int = 0
+      
+      var legendeordinatenarray:[CGFloat] = []
+      legendeordinatenarray.removeAll()
+     
+      
+      for line in legendearray
+      {
+         print("legendearray line: \(line)")
+         legendeordinatenarray.append(line["legendeposition"] ?? 0)
+      }
+      print("legendeordinatenarray: \(legendeordinatenarray)")      
+
+      
       for i in  0..<GraphArray.count
       {
          if (GraphArray[i].isEmpty)
@@ -1399,6 +1479,7 @@ extension DataPlot
             //Swift.print("drawDiagrammRect GraphArray von \(i) ist nicht Empty")
          }
          
+         var cp = GraphArray[i].currentPoint
          let tempanzeigefaktor = lastdata?["af\(i)"]
          
          if (tempanzeigefaktor != nil)
@@ -1409,7 +1490,6 @@ extension DataPlot
             let tempsortenfaktor = (lastdata?["sf\(i)"])
             if (tempsortenfaktor != nil)
             {
-               
                if (Float(tempsortenfaktor!) >= 10.0) // division durch 10, mehr Stellen angeben
                {
                   stellenzahl = 2
@@ -1428,25 +1508,36 @@ extension DataPlot
             
             context?.setStrokeColor(linienfarbeArray[tempdeviceID][(i & 0x07)].cgColor) // linienfarbearray hat nur je 8 Farben
             
-            // 4
+            // 
             context?.addPath(GraphArray[i])
             //context?.beginPath()
             context?.drawPath(using: .stroke)
             
+            var legendepath  = CGMutablePath()
+            
+            //cp = GraphArray[i].currentPoint
+            legendepath.move(to:cp)
+            cp.x+=16
+            cp.y = legendeordinatenarray[legendeindex]
+            //Swift.print("+")
+            legendeindex += 1
+            
+            legendepath.addLine(to: cp)
+            cp.x += 4
+            legendepath.addLine(to: cp)
+            context?.addPath(legendepath)
+            context?.drawPath(using: .stroke)
+            cp.y -= 12
+            //Swift.print("*")
             if let wert = lastdata?[String(i)]
             {
-               
                
                //        Swift.print("diagramm lastdatax: \(lastdatax!)")
                
                //         Swift.print("i: \(i) qlastx: \(qlastx) qlasty: \(qlasty) wert: \(wert)\n")
                
                //https://www.hackingwithswift.com/example-code/core-graphics/how-to-draw-a-text-string-using-core-graphics
-               let p = GraphArray[i].currentPoint
-               
-               
-               //Swift.print("diagramm p x: \(p.x)")
-               
+                
                //         Swift.print("qlastx: \(qlastx)  DatenDicArray: \n\(DatenDicArray)")
                //         let a = DatenDicArray.filter{$0["x"] == qlasty}
                //         Swift.print("a: \(a)")
@@ -1462,7 +1553,7 @@ extension DataPlot
                paragraphStyle.alignment = .left
                
                let attrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue", size: 10)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle ,convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): DatafarbeArray[i]]
-               tempWertString.draw(with: CGRect(x: p.x + 4, y: p.y-6, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
+               tempWertString.draw(with: CGRect(x: cp.x + 4, y: cp.y-6, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
             } // if wert = lastdata
          } // if Anzeigefaktor != nil 
       } // for i in GraphArray.count

@@ -465,6 +465,13 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
               userInfo: nil)
       
    }
+   
+   struct legendestruct:Codable
+   {
+      var wert:CGFloat
+      var index:Int
+   }
+
 
 // MARK: viewDidLoad   
    override func viewDidLoad() 
@@ -1703,7 +1710,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
 
                //print("deviceID: \(deviceID) device: \(dev) ")
                let messungfloatzeilenarray:[Float] = messungfloatarray[deviceID ?? 0]     
-               print("messungfloatzeilenarray dev: \(dev): \(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0]) raw devMayorTeileY: \(deviceMajorTeileY)")
+               //print("messungfloatzeilenarray dev: \(dev): \(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0]) raw devMayorTeileY: \(deviceMajorTeileY)")
                //print(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0])
                /*
                 Werte fuer Diagramm auf 100 normieren (MaxY)
@@ -1837,7 +1844,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               
                            AnzeigeFaktor = 1.0 // Anzeige strecken
                               SortenFaktor = 1 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
-                              print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
+                              //print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
                               
                               
                            
@@ -1886,7 +1893,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                         break
                      }// switch device
                      
-                     print("\t\tdeviceID: \(deviceID)wert_norm: \t\(wert_norm) diagrammkanalindex: \(diagrammkanalindex)")
+                     //print("\t\tdeviceID: \(deviceID)wert_norm: \t\(wert_norm) diagrammkanalindex: \(diagrammkanalindex)")
                      tempwerte[diagrammkanalindex] = wert_norm
                      werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID ?? 0), SortenFaktor, AnzeigeFaktor, Float(deviceMajorTeileY ?? 0)]
                  
@@ -1916,8 +1923,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             } // on = 1
          }// end swiftArray.count
          
-         print("deviceDatastring: \(deviceDatastring)")
-         print("tempinputDataFeldstring: \(tempinputDataFeldstring)")
+         //print("deviceDatastring: \(deviceDatastring)")
+         //print("tempinputDataFeldstring: \(tempinputDataFeldstring)")
          
          inputDataFeld.string = inputDataFeld.string + tempinputDataFeldstring + "\n"
       //https://stackoverflow.com/questions/40478728/appending-text-to-nstextview-in-swift-3
