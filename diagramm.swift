@@ -1412,22 +1412,23 @@ extension DataPlot
          maxy = fmax(maxy,cp.y)
 
          // end datenlegende
-         Swift.print("diagramm cp x: \(cp.x)")
+         //Swift.print("diagramm cp x: \(cp.x)")
          }
       } // for i <12
-
-      print("miny: \(miny) maxy: \(maxy) legendearray: \(legendearray)")
-      print("legendearray unsorted: \(legendearray)")
+      print("miny: \(miny) maxy: \(maxy)")
+      //print("miny: \(miny) maxy: \(maxy) legendearray: \(legendearray)")
+      //print("legendearray unsorted: \(legendearray)")
       legendearray = legendearray.sorted(by: { $0["wert"] ?? 0 < $1["wert"] ?? 0 })
       print("legendearray sorted wert: \(legendearray)")
       
       for legendelinie  in legendearray
       {
-         print("legendelinie index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0)")
+         print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0)")
       }
     
       
       //Swift.print("structlegendearray unsorted: \(structlegendearray)")
+      /*
       print("structlegendearray sorted wert: \(legendearray)")
       for legendelinie  in structlegendearray
      {
@@ -1436,6 +1437,12 @@ extension DataPlot
       if legendearray.last == [:]
       {
          legendearray.removeLast()
+      }
+ */
+      if legendearray.count == 0
+      {
+         print("legendearray.count")
+         return
       }
       datenlegende.setLegendearray(legendearray: legendearray)
  
@@ -1461,7 +1468,7 @@ extension DataPlot
       
       for line in legendearray
       {
-         print("legendearray line: \(line)")
+         //print("legendearray line: \(line)")
          legendeordinatenarray.append(line["legendeposition"] ?? 0)
       }
       print("legendeordinatenarray: \(legendeordinatenarray)")      
@@ -1512,7 +1519,7 @@ extension DataPlot
             context?.addPath(GraphArray[i])
             //context?.beginPath()
             context?.drawPath(using: .stroke)
-            
+            /*
             var legendepath  = CGMutablePath()
             
             //cp = GraphArray[i].currentPoint
@@ -1525,9 +1532,10 @@ extension DataPlot
             legendepath.addLine(to: cp)
             cp.x += 4
             legendepath.addLine(to: cp)
-            context?.addPath(legendepath)
-            context?.drawPath(using: .stroke)
+   //         context?.addPath(legendepath)
+   //         context?.drawPath(using: .stroke)
             cp.y -= 12
+ */
             //Swift.print("*")
             if let wert = lastdata?[String(i)]
             {
