@@ -144,6 +144,7 @@ class DataPlot: NSView
          datentitelarray[0] = "U_M"
          datentitelarray[1] = "U_O"
          datentitelarray[2] = "I_A"
+         datentitelarray[3] = "I_B"
 
          NotificationCenter.default.addObserver(self, selector:#selector(StartAktion(_:)),name:NSNotification.Name(rawValue: "data"),object:nil)
       } // for i
@@ -1249,7 +1250,7 @@ extension DataPlot
          return
       }
       let ru = datenlegende.randunten
-      Swift.print("randunten: \(ru)")
+      //Swift.print("randunten: \(ru)")
       //Swift.print("GraphArray: \n\(GraphArray)")
       
       var path = CGMutablePath()
@@ -1404,9 +1405,7 @@ extension DataPlot
          wertdic["index"] = CGFloat(k)
          legendearray.append(wertdic)
             
-         var wertstruct = legendestruct(wert: cp.y, index:k)
-         structlegendearray.append(wertstruct)  
-            
+                
          // Bereich bestimmen
          miny = fmin(miny,cp.y)
          maxy = fmax(maxy,cp.y)
@@ -1423,7 +1422,7 @@ extension DataPlot
       
       for legendelinie  in legendearray
       {
-         print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0)")
+         print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0) ")
       }
     
       
@@ -1441,7 +1440,7 @@ extension DataPlot
  */
       if legendearray.count == 0
       {
-         print("legendearray.count")
+         print("legendearray.count ist 0")
          return
       }
       datenlegende.setLegendearray(legendearray: legendearray)
@@ -1452,26 +1451,48 @@ extension DataPlot
       
       legendearray = datenlegende.legendedicarray
       
-      print("LegendeArray nach setLegendeArray: \(legendearray)")
+      print("LegendeArray nach setLegendeArray:")
+      
+      for line in legendearray
+      {
+         //print("legendearray line: \(line)")
+         let wert:CGFloat = line["wert"] ?? 0
+         let legpos:CGFloat = line["legendeposition"] ?? 0
+         let index:Int = Int(line["index"] ?? 0)
+         print("index: \t\(index) \twert: \t\(s2(wert)) \tlegpos: \t\(s2(legpos))")
+      }
+
       
       legendearray.sort(by: { ($0["index"] ?? 0) < ($1["index"] ?? 0) })
       
-      print("legendearray sorted index: \(legendearray)")
-      
-      legendearray[0]["wert"] = 0
+      print("legendearray sorted index:")
+      for line in legendearray
+      {
+         //print("legendearray line: \(line)")
+         let wert:CGFloat = line["wert"] ?? 0
+         let legpos:CGFloat = line["legendeposition"] ?? 0
+         let index:Int = Int(line["index"] ?? 0)
+         print("index: \t\(index) \twert: \t\(s2(wert)) \tlegpos: \t\(s2(legpos))")
+      }
+ 
+    //  legendearray[0]["wert"] = 0
       
       var legendeindex:Int = 0
       
       var legendeordinatenarray:[CGFloat] = []
       legendeordinatenarray.removeAll()
      
-      
+      print("legendeordinatenarray")
       for line in legendearray
       {
          //print("legendearray line: \(line)")
+         let wert:CGFloat = line["wert"] ?? 0
+         let legpos:CGFloat = line["legendeposition"] ?? 0
+         let index:Int = Int(line["index"] ?? 0)
+         print("index: \t\(index) \twert: \t\(s2(wert)) \tlegpos: \t\(s2(legpos))")
          legendeordinatenarray.append(line["legendeposition"] ?? 0)
       }
-      print("legendeordinatenarray: \(legendeordinatenarray)")      
+      print(" \(legendeordinatenarray)")      
 
       
       for i in  0..<GraphArray.count
@@ -1519,7 +1540,7 @@ extension DataPlot
             context?.addPath(GraphArray[i])
             //context?.beginPath()
             context?.drawPath(using: .stroke)
-            /*
+            
             var legendepath  = CGMutablePath()
             
             //cp = GraphArray[i].currentPoint
@@ -1532,10 +1553,10 @@ extension DataPlot
             legendepath.addLine(to: cp)
             cp.x += 4
             legendepath.addLine(to: cp)
-   //         context?.addPath(legendepath)
-   //         context?.drawPath(using: .stroke)
+            context?.addPath(legendepath)
+            context?.drawPath(using: .stroke)
             cp.y -= 12
- */
+ 
             //Swift.print("*")
             if let wert = lastdata?[String(i)]
             {
@@ -1561,7 +1582,7 @@ extension DataPlot
                paragraphStyle.alignment = .left
                
                let attrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue", size: 10)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle ,convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): DatafarbeArray[i]]
-               tempWertString.draw(with: CGRect(x: cp.x + 4, y: cp.y-6, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
+               tempWertString.draw(with: CGRect(x: cp.x + 4, y: cp.y+6, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
             } // if wert = lastdata
          } // if Anzeigefaktor != nil 
       } // for i in GraphArray.count

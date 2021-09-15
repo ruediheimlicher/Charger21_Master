@@ -12,6 +12,11 @@ import Darwin
 import AppKit
 import Cocoa
 
+func s2(_ wert:CGFloat)->String
+{
+   return String(format:"%2.2f",wert)
+}
+
 struct legendestruct:Codable
 {
    var wert:CGFloat
@@ -38,8 +43,7 @@ struct legendestruct:Codable
 class rDatenlegende:NSObject
 {
    var    randunten:CGFloat = 12, randoben:CGFloat = 0, abstandnach:CGFloat = -1, abstandvor:CGFloat = -1, mindistanz:CGFloat = 16;
-   var legendedicarray:[[String:CGFloat]] = [[:]]
-   
+   var legendedicarray = [[String:CGFloat]]()
    init(coder  aCoder: NSCoder)
    {
       Swift.print("rDatenlegende init coder")
@@ -181,86 +185,156 @@ class rDatenlegende:NSObject
    
    {
       //legendearray:  dics mit index und wert fuer jeden datenpunkt, geordnet nach groesse
-      print("*****************  setlegendearray start\n")
+      print("\n\n*****************  setlegendearray start")
       var clusterarray:[[[String:CGFloat]]] = [[[:]]] // arrays von werten mit zu kleinem abstand
       //clusterarray.append([["index":0],["wert":0]])
       // Array mit Dics zu jedem Cluster: Array mit Elementen, abstaende usw,
       
+      for legendelinie  in legendearray
+      {
+         print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0) ")
+      }
       
+      legendedicarray = Array(repeating:["String":0],count:legendearray.count)
+
+      
+      var newlegendearray:[[String:CGFloat]] = Array(repeating:["String":0],count:legendearray.count)
       // Abstande einsetzen
       var lastposition:CGFloat = randunten // effektive Position des vorherigen Elements, am Anfang = unterer Rand
       var minposition:CGFloat = randunten     // minimalposition fuer Element
       var distanz:CGFloat = 0     // effektive distanz zum vorherigen Element
       
       var clusterindex:CGFloat = 0
-      legendedicarray.removeAll()
+      //legendedicarray.removeAll()
       var abstandmin:CGFloat = 1000
       // abstaende abfragen: minimum suchen
       var minindex:CGFloat = 0
       var mindicO:[String:CGFloat] = legendearray[0]
       var mindicU:[String:CGFloat] = legendearray[0]
-      let mindestabstand = mindistanz
+      let mindestabstand:CGFloat = mindistanz
       var mitte:CGFloat  = 0; // schwerpunkt des clusters
-      var clusterh:CGFloat  = 0; // hoehe des clusters
-      var clustero:CGFloat  = 0; // oberer Rand
-      var clusteru:CGFloat  = 0; // unterer Rand
+      var clusterH:CGFloat  = 0; // hoehe des clusters
+      var clusterO:CGFloat  = 0; // oberer Rand
+      var clusterU:CGFloat  = 0; // unterer Rand
+      
+      // ordinateclusterarray
+      var ordinateclusterarray:[[[String:CGFloat]]] = [[[:]]] // 
+      
       var minabstandarray = [[[String:CGFloat]]]()
       
       var clusterindexset = IndexSet()
+      newlegendearray[0] = legendearray[0]
+      newlegendearray[0]["legendeposition"] = legendearray[0]["wert"] // ohne clusterbildung identisch
+      
+      legendedicarray[0] = legendearray[0]
+      legendedicarray[0]["legendeposition"] = legendearray[0]["wert"] // ohne clusterbildung identisch
+
       for i in 1..<legendearray.count
       {
+         newlegendearray[i] = legendearray[i]
+         legendedicarray[i] = legendearray[i]
+         legendedicarray[i]["legendeposition"] = legendearray[1]["wert"] // ohne clusterbildung identisch
          if clusterindexset.contains(i)
          {
             break
          }
+         
          let last = legendearray[i-1]["wert"] ?? 0.0
          let temp = legendearray[i]["wert"] ?? 0.0
+         //print("i: \(i) temp: \(s2(temp))")
          let tempabstand = temp - last
          
          
          if temp - last < mindestabstand // Vorkommen detektiert
          {
-            
+            /*
+             var clusterdic:[String:CGFloat] = [:]
+             clusterdic["legendeposition"] = legendeposition
+             clusterdic["clusterindex"] = CGFloat(clusterindex)
+             clusterdic["index"] = CGFloat(index)
+             clusterdic["wert"] = tempwert
+             clusterdic["lastposition"] = lastposition
+             clusterdic["abstandvor"] = 0
+
+             */
+            var wertsumme:CGFloat = 0 // akkumulierte Hoehe des clusters fuer mittebestimmung
             var tempclusterdicarray = [[[String:CGFloat]]]()  // dics des clusters
             //var clusterdic 
             var anzclusterelemente = 0
+            var temppositionU:CGFloat = 0
+            var temppositionO:CGFloat = 0
+            
             abstandmin = temp - last
+            
             mindicO = legendearray[i]  // Ordinate des oberen elements 
             mindicO["clusterindex"] = clusterindex
-            tempclusterdicarray.append([mindicO])
+            
+            legendedicarray[i]["clusterindex"] = clusterindex
+            newlegendearray[i]["clusterindex"] = clusterindex
+            
             mindicU = legendearray[i-1] // Ordinate des unteren elements 
             mindicU["clusterindex"] = clusterindex
-            tempclusterdicarray.append([mindicU])
+            
+            
+            
             anzclusterelemente += 2
+            
+            // wertsumme:
+            wertsumme = mindicO["wert"]! + mindicU["wert"]!
             mitte = (mindicO["wert"]! + mindicU["wert"]!)/CGFloat(anzclusterelemente) // Schwerpunkt des clusters
+   
+            temppositionO = mitte + mindistanz/2        // legendeposition startelement
+            mindicO["legendeposition"] = temppositionO 
+            tempclusterdicarray.append([mindicO])
+            legendedicarray[i]["legendeposition"] = temppositionO 
+            
+            
+            temppositionU = mitte - mindistanz/2 // legendeposition in legende unteres Element
+            mindicU["legendeposition"] = temppositionU
+            tempclusterdicarray.append([mindicU])
+            legendedicarray[i-1] = mindicU
             //mitte = (mindicO["wert"]! + mindicU["wert"]!)/2
-            clusterh = 2*mindistanz // Paket mit 2 Feldern
-            clustero = mitte + mindistanz // aktueller oberer Rand
-            clusteru = mitte - mindistanz // aktueller unterer Rand
-            minindex = legendearray[i]["index"] ?? 0
-            var tempabstanddic:[[String:CGFloat]] = [["index": minindex],["abstand":temp - last]]
+            
+            clusterH = 2*mindistanz // Paket mit 2 Feldern
+            clusterO = mitte + mindistanz // aktueller oberer Rand
+            clusterU = mitte - mindistanz // aktueller unterer Rand, 
+            
+            
+           // minindex = legendearray[i]["index"] ?? 0
+           // var tempabstanddic:[[String:CGFloat]] = [["index": minindex],["abstand":temp - last]]
             clusterindexset.insert(i)
             clusterindexset.insert(i-1)
     
-            print("\ni: \(i) clustero: \(clustero) clusteru: \(clusteru) mitte: \(mitte)")
             
-            // nachfolgende werte checken
+            // groessere werte checken
             var k = i+1 // next position
             while k <  legendearray.count
             {
-               let tempwert = legendearray[k]["wert"] ?? 0
-               if tempwert < clustero + mindistanz/2 // wert wuerde cluster tangieren
+               let tempwert = legendearray[k]["wert"] ?? 0 // wert des El
+               let tempindex = legendearray[k]["index"] ?? 0 // index des El
+               
+               if tempwert < clusterO + mindistanz // wert wuerde cluster tangieren
                {
                   if !clusterindexset.contains(k)
                   {
                      print("i: \(i) k: \(k) weiteres Element gefunden oben")
-                     mitte = (mindicO["wert"]! + mindicU["wert"]! + tempwert) / 3
+                     wertsumme += tempwert
+                     anzclusterelemente += 1
+        //             mitte = (mindicO["wert"]! + mindicU["wert"]! + tempwert) / CGFloat(anzclusterelemente)
+                     
                      var templegendeelement = legendearray[k]
                      
                      let tempindex = legendearray[k]["index"] ?? 0
                      templegendeelement["clusterindex"] = clusterindex
+                     temppositionO += mindistanz // ein schritt hoeher
+                     templegendeelement["legendeposition"] = temppositionO
+                     
+                     // element einsetzen
                      tempclusterdicarray.append([templegendeelement])
+                     legendedicarray[k] = templegendeelement
                      clusterindexset.insert(k)
+                     clusterO += mindistanz // cluster reicht hoeher
+                     clusterH += mindistanz
                   }
                }
                
@@ -268,38 +342,85 @@ class rDatenlegende:NSObject
                k += 1
             }// while k
             
-            // vorherige Werte checken
+            // kleinere Werte checken
             var m = i-2 // prev position, i-1 ist bereits gechecked
             while m > 0
             {
                let tempwert = legendearray[m]["wert"] ?? 0
-               if tempwert > clusteru - mindistanz/2 // schrift von wert wuerde cluster tangieren
+               if tempwert > clusterU - mindistanz // schrift von wert wuerde cluster tangieren
                {
                   if !clusterindexset.contains(m)
                   {
                      print("i: \(i) m: \(m) weiteres Element gefunden unten")
+                     wertsumme += tempwert
+                     anzclusterelemente += 1
                      var templegendeelement = legendearray[m]
                      let tempindex = legendearray[m]["index"] ?? 0
                      templegendeelement["clusterindex"] = clusterindex
+                     temppositionU -= mindistanz // ein schritt tiefer
+                     templegendeelement["legendeposition"] = temppositionU
+                     
+                     // element einsetzen
                      tempclusterdicarray.append([templegendeelement])
+                     legendedicarray[m] = templegendeelement
                      clusterindexset.insert(m)
+                     clusterU -= mindistanz // cluster reicht tiefer
+                     clusterH += mindistanz
                   }
                }
                m -= 1
             } // while m
-            print("tempclusterdicarray clusterindex:\(clusterindex)")
+            
+            print("\ni: \(i)\t clusterO: \t\(s2(clusterO)) \tclusterU: \t\(s2(clusterU))  \tclusterH: \t\(s2(clusterH)) mitte: \t\(s2(mitte))")
+
+           //  \(tempclusterdicarray)  clusterindex:\(clusterindex) clusterO: \(s2(clusterO))  clusterU: \(s2(clusterU))")
+            
+            print("tempclusterdicarray:")
             for clusterzeile in tempclusterdicarray
             {
-               print("zeile wert: \(clusterzeile[0]["wert"] ?? 0) index: \(clusterzeile[0]["index"]) clusterindex: \(clusterzeile[0]["clusterindex"]))")
+               let lp = clusterzeile[0]["legendeposition"] ?? 0
+               print("zeile wert: \t\(String(format:"%2.2f",clusterzeile[0]["wert"] ?? 0)) \tindex: \t\(s2(clusterzeile[0]["index"] ?? 0)) \tlegendeposition: \t\(s2(lp)) \tclusterindex: \t\(s2(clusterzeile[0]["clusterindex"] ?? 0))")
                
                //print(clusterzeile)
             }
+            
+            
+            tempclusterdicarray sortieren
+            let newmitte = wertsumme / CGFloat(anzclusterelemente)
+            let verschiebung = mitte - (wertsumme / CGFloat(anzclusterelemente))
+            
+            print("i: \(i) clusterindex: \(clusterindex) i: \(i) wertsumme: \(s2(wertsumme)) mitte: \(s2(mitte)) newmitte: \(s2(newmitte)) clusterU: \(s2(clusterU)) verschiebung: \(s2(verschiebung))")
+            
+            
+            m = i-2 // Werte vor i, rueckwaerts
+            while (m > 0)
+            {
+               let tempwert = legendearray[m]["wert"] ?? 0
+               
+               let distanz = clusterU - tempwert  // distanz zu unterem Rand des Clusters
+               print("i: \(i) m: \(m) distanz: \(s2(distanz))")
+               if distanz <  mindistanz/2 // wert wuerde cluster tangieren
+               {
+                  print("Element zu nahe")
+               }
+               m -= 1
+            }
+            
+            
+            print("***  i: \(i) anz cluster: \(tempclusterdicarray.count)")
+
+            print("********** end if < mindestabstand \n")
+            
             clusterindex += 1
          } // if < mindestabstand
  
-         
-      } // for legendearray count
-      print("clusterindexset count: \(clusterindexset.count)")
+         //print("*** end for i clusterindexset count: \(clusterindexset.count) clusterindexset: \(clusterindexset)")
+ 
+      } // for i .. legendearray count
+      
+      
+      
+      
       /*
       print("\nminabstandarray:")
       for zeile in minabstandarray
@@ -311,13 +432,25 @@ class rDatenlegende:NSObject
       print("\n")
      */
       
-      
-      for i in 0..<legendearray.count
+      print("\n newlegendearray nach ")
+       for i in 0..<legendedicarray.count
+      {
+         print("i: \(i) zeile:\(legendedicarray[i])")
+        }
+      print("\n")
+      print("\n legendearray nach ")
+       for i in 0..<legendearray.count
       {
          
+         print("i: \(i) legendearray: \(legendearray[i])")
          let indexzeile:[String:CGFloat] = legendearray[i]
          let index = indexzeile["index"]
          let tempwert:CGFloat = indexzeile["wert"] ?? 0 // wert, y-Abstand
+         
+         
+         
+         return
+         
          
          // wenn genuegend Platz: Legende neben wert
          var legendeposition:CGFloat  = tempwert // lage neben graphlinie

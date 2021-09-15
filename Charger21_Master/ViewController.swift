@@ -1633,6 +1633,19 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          stromMFeld.integerValue = Int(I_A)
          let I_A_float = Float(I_A)
          print("Strom float: \(I_A_float)")
+         
+         // Strom B
+         let I_B_LO = UInt16(teensy.read_byteArray[STROM_B_L_BYTE  + DATA_START_BYTE])
+         let I_B_HI = UInt16(teensy.read_byteArray[STROM_B_H_BYTE  + DATA_START_BYTE])
+         print("TEENSY_DATA Strom B I_B_LO: \(I_B_LO) I_B_HI: \(I_B_HI) ")
+         let I_B = I_B_LO | (I_B_HI<<8)
+         print("Strom B: \(I_B)")
+         stromOFeld.integerValue = Int(I_B)
+         let I_B_float = Float(I_B)
+         print("Strom B float: \(I_B_float)")
+
+         
+         
          // Temperatur SOURCE
          let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
          let Temp_Source_HI = UInt16(teensy.read_byteArray[TEMP_SOURCE_H_BYTE  + DATA_START_BYTE])
@@ -1659,6 +1672,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          messungfloatarray[0][DIAGRAMMDATA_OFFSET + 1] = U_O_float  // DIAGRAMMDATA_OFFSET 4
 
          messungfloatarray[1][DIAGRAMMDATA_OFFSET + 0] = I_A_float
+         messungfloatarray[1][DIAGRAMMDATA_OFFSET + 1] = I_B_float
          
          
          let tempzeit = tagsekunde()
