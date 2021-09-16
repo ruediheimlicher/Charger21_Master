@@ -1451,7 +1451,7 @@ extension DataPlot
       
       
       
-      legendearray = datenlegende.legendedicarray // legendedicarray:[[String:CGFloat]] = [[:]]
+      legendearray = datenlegende.legendearray() // legendedicarray:[[String:CGFloat]] = [[:]]
       
 //      print("LegendeArray nach setLegendeArray: \(legendearray)")
       

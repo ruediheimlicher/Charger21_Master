@@ -53,7 +53,10 @@ class rDatenlegende:NSObject
        
    }
 
-   
+   func legendearray() -> [[String:CGFloat]]
+   {
+      return legendedicarray
+   }
    
    func setVorgabendic(vorgabendic:[String:CGFloat])
    {
