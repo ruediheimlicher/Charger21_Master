@@ -193,6 +193,7 @@ class rDatenlegende:NSObject
       //clusterarray.append([["index":0],["wert":0]])
       // Array mit Dics zu jedem Cluster: Array mit Elementen, abstaende usw,
       
+      var allclusterarray = [[String:CGFloat]]()
       
       // Abstande einsetzen
       var lastposition:CGFloat = randunten // effektive Position des vorherigen Elements, am Anfang = unterer Rand
@@ -215,11 +216,24 @@ class rDatenlegende:NSObject
       // ordinateclusterarray
       var ordinateclusterarray:[[[String:CGFloat]]] = [[[:]]] // 
       
-      var minabstandarray = [[[String:CGFloat]]]()
+     
+//      var newlegendearray = legendearray
+      var z=0
+      for zeile in legendearray
+      {
+         print("z: \(z) \(zeile)")
+      }
+      //newlegendearray.append(legendearray[0])
+ //     newlegendearray[0]["legendeposition"] = legendearray[0]["wert"] ?? 0.0 // default, legendeposition entspricht wert
+ //     newlegendearray[0]["clusterindex"] = 32 // Element ausserhalb eines clusters
       
       var clusterindexset = IndexSet()
       for i in 1..<legendearray.count
       {
+         //newlegendearray.append(legendearray[i])
+   //      newlegendearray[i]["legendeposition"] = legendearray[i]["wert"] ?? 0.0 // default, legendeposition entspricht wert
+   //      newlegendearray[i]["clusterindex"] = 32 // Element ausserhalb eines clusters
+         
          if clusterindexset.contains(i)
          {
             break
@@ -228,8 +242,7 @@ class rDatenlegende:NSObject
          let temp = legendearray[i]["wert"] ?? 0.0
          let tempabstand = temp - last
          
-         
-         if temp - last < mindestabstand // Vorkommen detektiert
+          if temp - last < mindestabstand // Vorkommen detektiert
          {
             /*
              var clusterdic:[String:CGFloat] = [:]
@@ -242,9 +255,9 @@ class rDatenlegende:NSObject
 
              */
             var wertsumme:CGFloat = 0 // akkumulierte Hoehe des clusters fuer mittebestimmung
-            var tempclusterdicarray = [[[String:CGFloat]]]()  // dics des clusters
+       //     var tempclusterdicarray = [[[String:CGFloat]]]()  // dics des clusters
             
-            var tempBclusterdicarray = [[String:CGFloat]]()  // dics des clusters
+            var tempclusterdicarray = [[String:CGFloat]]()  // dics des clusters
             
             //var clusterdic 
             var anzclusterelemente = 0
@@ -254,10 +267,11 @@ class rDatenlegende:NSObject
             abstandmin = temp - last
             mindicO = legendearray[i]  // Ordinate des oberen elements 
             mindicO["clusterindex"] = clusterindex
+    //        newlegendearray[i]["clusterindex"] = clusterindex
               
             mindicU = legendearray[i-1] // Ordinate des unteren elements 
             mindicU["clusterindex"] = clusterindex
-            
+      //      newlegendearray[i-1]["clusterindex"] = clusterindex
             
             
             anzclusterelemente += 2
@@ -267,16 +281,21 @@ class rDatenlegende:NSObject
             mitte = (mindicO["wert"]! + mindicU["wert"]!)/CGFloat(anzclusterelemente) // Schwerpunkt des clusters
    
             temppositionO = mitte + mindistanz/2        // legendeposition startelement
-            mindicO["legendeposition"] = temppositionO 
-            tempclusterdicarray.append([mindicO])
             
-            tempBclusterdicarray.append(mindicO)
+     //       newlegendearray[i]["legendeposition"] = temppositionO
+            mindicO["legendeposition"] = temppositionO 
+            
+            tempclusterdicarray.append(mindicO)
+            allclusterarray.append(mindicO)
             
             temppositionU = mitte - mindistanz/2 // legendeposition in legende unteres Element
             mindicU["legendeposition"] = temppositionU
-            tempclusterdicarray.append([mindicU])
             
-            tempBclusterdicarray.append(mindicU)
+     //       newlegendearray[i-1]["legendeposition"] = temppositionU
+            tempclusterdicarray.append(mindicU)
+            
+            allclusterarray.append(mindicU)
+            
             //mitte = (mindicO["wert"]! + mindicU["wert"]!)/2
             
             clusterH = 2*mindistanz // Paket mit 2 Feldern
@@ -301,7 +320,7 @@ class rDatenlegende:NSObject
                {
                   if !clusterindexset.contains(k)
                   {
-                     print("i: \(i) k: \(k) weiteres Element gefunden oben")
+                     print("i: \(i) k: \(k) index: \(tempindex) weiteres Element gefunden oben")
                      wertsumme += tempwert
                      anzclusterelemente += 1
         //             mitte = (mindicO["wert"]! + mindicU["wert"]! + tempwert) / CGFloat(anzclusterelemente)
@@ -314,10 +333,13 @@ class rDatenlegende:NSObject
                      templegendeelement["legendeposition"] = temppositionO
                      
                      // element einsetzen
-                     tempclusterdicarray.append([templegendeelement])
+                 //    tempclusterdicarray.append([templegendeelement])
                      
-                     tempBclusterdicarray.append(templegendeelement)
+                     tempclusterdicarray.append(templegendeelement)
+                     allclusterarray.append(templegendeelement)
                      
+                      
+                        
                      clusterindexset.insert(k)
                      clusterO += mindistanz // cluster reicht hoeher
                      clusterH += mindistanz
@@ -333,7 +355,7 @@ class rDatenlegende:NSObject
             while m > 0
             {
                let tempwert = legendearray[m]["wert"] ?? 0
-               if tempwert > clusterU - mindistanz/2 // schrift von wert wuerde cluster tangieren
+               if tempwert >= clusterU - mindistanz/2 // schrift von wert wuerde cluster tangieren
                {
                   if !clusterindexset.contains(m)
                   {
@@ -347,10 +369,12 @@ class rDatenlegende:NSObject
                      templegendeelement["legendeposition"] = temppositionU
                      
                      // element einsetzen
-                     tempclusterdicarray.append([templegendeelement])
+                //     tempclusterdicarray.append([templegendeelement])
                      
-                     tempBclusterdicarray.append(templegendeelement)
+                     tempclusterdicarray.append(templegendeelement)
+                     allclusterarray.append(templegendeelement)
                      
+                      
                      clusterindexset.insert(m)
                      clusterU -= mindistanz // cluster reicht tiefer
                      clusterH += mindistanz
@@ -373,8 +397,9 @@ class rDatenlegende:NSObject
             //  var tempclusterdicarray = [[[String:CGFloat]]]()
            //
             
-            tempBclusterdicarray.sort(by: { ($0["wert"] ?? 0) > ($1["wert"] ?? 0) })
+            tempclusterdicarray.sort(by: { ($0["wert"] ?? 0) > ($1["wert"] ?? 0) })
             
+            /*
             for clusterzeile in tempclusterdicarray
             {
                print("clusterzeile: \(clusterzeile)")
@@ -383,26 +408,73 @@ class rDatenlegende:NSObject
                
                //print(clusterzeile)
             }
-            
-            print("B")
-            print("\ni: \t\(i)\t clusterO: \t\(s2(clusterO)) \tclusterU: \t\(s2(clusterU))  \tclusterH: \t\(s2(clusterH)) \tmitte: \t\(s2(mitte))")
+            */
+            print("B ***")
+            print("i: \t\(i)\t clusterO: \t\(s2(clusterO)) \tclusterU: \t\(s2(clusterU))  \tclusterH: \t\(s2(clusterH)) \tmitte: \t\(s2(mitte))")
 
-            for clusterzeile in tempBclusterdicarray
+            for clusterzeile in tempclusterdicarray
             {
-               //print("B clusterzeile: \(clusterzeile)")
-               let lp = clusterzeile["legendeposition"] ?? 0
-               print("B zeile wert: \t\(String(format:"%2.2f",clusterzeile["wert"] ?? 0)) \tindex: \t\(s2(clusterzeile["index"] ?? 0)) \tlegendeposition: \t\(s2(lp)) \tclusterindex: \t\(s2(clusterzeile["clusterindex"] ?? 0))")
-               
+               let zeilenindex:Int = Int(clusterzeile["index"] ?? 0)
+               let templegendeposition = clusterzeile["legendeposition"] ?? 0
+               let tempclusterindex = clusterzeile["clusterindex"] ?? 0
+               print("B zeile wert: \t\(String(format:"%2.2f",clusterzeile["wert"] ?? 0)) \tindex: \t\(s2(clusterzeile["index"] ?? 0)) \tlegendeposition: \t\(s2(templegendeposition)) \tclusterindex: \t\(s2(clusterzeile["clusterindex"] ?? 0))")
+               //newlegendearray[zeilenindex]["legendeposition"] = templegendeposition
+               //newlegendearray[zeilenindex]["clusterindex"] = tempclusterindex
                //print(clusterzeile)
             }
           
             
             
             clusterindex += 1
-         } // if < mindestabstand
+            
+          } // if < mindestabstand
  
          
       } // for i .. legendearray count
+      
+      print("clusterindexset: \(clusterindexset.enumerated())")
+      let indexsetarray:[Int] = clusterindexset.map({$0})
+      print("indexsetarray: \(indexsetarray)")
+      
+ //     let ok = allclusterarray.filter({ $0["index"] == 1})
+ //     print("ok: \(ok)")
+      var newlegendearray = [[String:CGFloat]]()
+      for i in 0..<legendearray.count
+      {
+         var legendezeile = legendearray[i]
+         print("i: \(i) legendezeile: \(legendezeile)")
+          
+         let ii:CGFloat = CGFloat(i)
+         if clusterindexset.contains(i)
+         {
+            print("***   index ist da: \(i) Element: \(legendearray[i])")
+            let tempindex = legendearray[i]["index"] ?? 0
+
+            let tempelement = allclusterarray.filter({ $0["index"] == ii})
+            print("contains: \(i)  ii: \(ii) tempelement: \(tempelement)")
+            
+           }
+         else
+         {
+            print("---   index ist nicht da: \(i)  Element: \(legendearray[i])")
+            let tempelement = allclusterarray.filter({ $0["index"] == ii})
+            print("contains not: \(i)  ii: \(ii) tempelement: \(tempelement)")
+       //     legendearray[i]["legendeposition"] = legendearray[i]["wert"] ?? 0
+         }
+      }
+      
+      print("\nallclusterarray")
+      for zeile in allclusterarray
+      {
+         let tempindex = zeile["index"] ?? 0
+         let tempwert = zeile["wert"] ?? 0
+         let templegendeposition = zeile["legendeposition"] ?? 0
+         let tempclusterindex = zeile["clusterindex"] ?? 0
+         print("index: \t\(tempindex) \twert: \t\(tempwert) \tlegendeposition: \t\(templegendeposition) \tclusterindex: \t\(tempclusterindex) ")
+      }
+
+      
+      
       print("clusterindexset count: \(clusterindexset.count)")
       /*
       print("\nminabstandarray:")

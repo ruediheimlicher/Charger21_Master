@@ -1402,7 +1402,9 @@ extension DataPlot
          
          var wertdic:[String:CGFloat] = [:]
          wertdic["wert"] = cp.y
+         wertdic["legendeposition"] = cp.y // default, wenn nichts im Weg ist
          wertdic["index"] = CGFloat(k)
+            
          legendearray.append(wertdic)
             
          var wertstruct = legendestruct(wert: cp.y, index:k)
@@ -1448,8 +1450,6 @@ extension DataPlot
       datenlegende.setLegendearray(legendearray: legendearray)
  
        //MARK: end datenlegende
-      
-      
       
       legendearray = datenlegende.legendearray() // legendedicarray:[[String:CGFloat]] = [[:]]
       
