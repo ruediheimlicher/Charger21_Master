@@ -1388,7 +1388,7 @@ extension DataPlot
          var wert:CGFloat
          var index:Int
       }
-      var structlegendearray:[legendestruct] = []
+      //var structlegendearray:[legendestruct] = []
       //var sortarray = structlegendearray.sort(by: {$0.wert > $1.wert })
       
       //legendearray aufbauen
@@ -1398,8 +1398,7 @@ extension DataPlot
          if (!(GraphArray[k].isEmpty))
          {
          let cp = GraphArray[k].currentPoint
-         
-         
+                  
          var wertdic:[String:CGFloat] = [:]
          wertdic["wert"] = cp.y
          wertdic["legendeposition"] = cp.y // default, wenn nichts im Weg ist
@@ -1407,8 +1406,8 @@ extension DataPlot
             
          legendearray.append(wertdic)
             
-         var wertstruct = legendestruct(wert: cp.y, index:k)
-         structlegendearray.append(wertstruct)  
+         //var wertstruct = legendestruct(wert: cp.y, index:k)
+         //structlegendearray.append(wertstruct)  
             
          // Bereich bestimmen
          miny = fmin(miny,cp.y)
@@ -1428,20 +1427,6 @@ extension DataPlot
       {
          print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0)")
       }
-    
-      
-      //Swift.print("structlegendearray unsorted: \(structlegendearray)")
-      /*
-      print("structlegendearray sorted wert: \(legendearray)")
-      for legendelinie  in structlegendearray
-     {
-      print("legendelinie index: \(legendelinie.index) wert: \(legendelinie.wert)")
-     }
-      if legendearray.last == [:]
-      {
-         legendearray.removeLast()
-      }
- */
       if legendearray.count == 0
       {
          print("legendearray.count")
@@ -1449,24 +1434,16 @@ extension DataPlot
       }
       datenlegende.setLegendearray(legendearray: legendearray)
  
-       //MARK: end datenlegende
-      
-      legendearray = datenlegende.legendearray() // legendedicarray:[[String:CGFloat]] = [[:]]
-      
-//      print("LegendeArray nach setLegendeArray: \(legendearray)")
-      
-      legendearray.sort(by: { ($0["index"] ?? 0) < ($1["index"] ?? 0) })
-      
-//      print("legendearray sorted index: \(legendearray)")
-      
-      legendearray[0]["wert"] = 0
-      
-      var legendeindex:Int = 0
-      
+       //MARK: end datenlegende      
+      legendearray = datenlegende.legendearray() // legendedicarray:[[String:CGFloat]] = [[:]]   
+      print("LegendeArray nach setLegendeArray: \(legendearray)")      
+      legendearray.sort(by: { ($0["index"] ?? 0) < ($1["index"] ?? 0) })      
+//      print("legendearray sorted index: \(legendearray)")      
+      legendearray[0]["wert"] = 0      
+      var legendeindex:Int = 0      
       var legendeordinatenarray:[CGFloat] = []
       legendeordinatenarray.removeAll()
-     
-      
+           
       for line in legendearray
       {
          //print("legendearray line: \(line)")
@@ -1507,10 +1484,10 @@ extension DataPlot
             
             //GraphArray[0].addLine(to: NSMakePoint(diagrammrect.origin.x + diagrammrect.size.width, diagrammrect.origin.y + diagrammrect.size.height))
             //GraphArray[0].closeSubpath()
-            let tempgreen = CGFloat((0xA0 + (i * 20) & 0xFF))
-            let linienfarbe = CGColor.init(red:0.0,green: 0.0, blue: 1.0,alpha:1.0)
+            //let tempgreen = CGFloat((0xA0 + (i * 20) & 0xFF))
+            //let linienfarbe = CGColor.init(red:0.0,green: 0.0, blue: 1.0,alpha:1.0)
             
-            context?.setLineWidth(1.5)
+            context?.setLineWidth(2.5)
             //    context?.setFillColor(fillColor)
             //context?.setStrokeColor(DatafarbeArray[i].cgColor)
             
@@ -1520,7 +1497,7 @@ extension DataPlot
             context?.addPath(GraphArray[i])
             //context?.beginPath()
             context?.drawPath(using: .stroke)
-            /*
+            
             var legendepath  = CGMutablePath()
             
             //cp = GraphArray[i].currentPoint
@@ -1533,16 +1510,15 @@ extension DataPlot
             legendepath.addLine(to: cp)
             cp.x += 4
             legendepath.addLine(to: cp)
-   //         context?.addPath(legendepath)
-   //         context?.drawPath(using: .stroke)
-            cp.y -= 12
- */
+            context?.addPath(legendepath)
+            context?.setLineWidth(1.5)
+            context?.drawPath(using: .stroke)
+            cp.y -= 2
+ 
             //Swift.print("*")
             if let wert = lastdata?[String(i)]
             {
-               
                //        Swift.print("diagramm lastdatax: \(lastdatax!)")
-               
                //         Swift.print("i: \(i) qlastx: \(qlastx) qlasty: \(qlasty) wert: \(wert)\n")
                
                //https://www.hackingwithswift.com/example-code/core-graphics/how-to-draw-a-text-string-using-core-graphics
@@ -1551,27 +1527,27 @@ extension DataPlot
                //         let a = DatenDicArray.filter{$0["x"] == qlasty}
                //         Swift.print("a: \(a)")
                //let lasty = DatenArray.last?[i+1]
-               
                //let labelfarbe = CGColor.init(red:1.0,green: 1.0, blue: 0.0,alpha:1.0)
-               let labelfarbe = NSColor.init(red:0.5,green: 0.8, blue: 0.5,alpha:1.0)
-               
+               //let labelfarbe = NSColor.init(red:0.8,green: 1.0, blue: 0.8,alpha:1.0)
                var labelformat = "%2.\(String(stellenzahl))f"
-               let tempWertString = String(format: labelformat,  wert)
+               
+               var tempWertString = String(format: labelformat,  wert)
+               if i < datentitelarray.count
+                     {
+                     tempWertString = tempWertString + "  " + datentitelarray[i]
+                     }
                //         Swift.print("i: \(i) p.y: \(p.y) wert: \(wert) tempWertString: \(tempWertString) DatenArray.last: \(DatenArray.last)")
                let paragraphStyle = NSMutableParagraphStyle()
                paragraphStyle.alignment = .left
                
                let attrs = [convertFromNSAttributedStringKey(NSAttributedString.Key.font): NSFont(name: "HelveticaNeue", size: 10)!, convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): paragraphStyle ,convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): DatafarbeArray[i]]
-               tempWertString.draw(with: CGRect(x: cp.x + 4, y: cp.y-6, width: 40, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
+               tempWertString.draw(with: CGRect(x: cp.x + 4, y: cp.y-6, width: 50, height: 14), options: .usesLineFragmentOrigin, attributes: convertToOptionalNSAttributedStringKeyDictionary(attrs), context: nil)
             } // if wert = lastdata
          } // if Anzeigefaktor != nil 
       } // for i in GraphArray.count
-         
-         
-         
+          
          context?.drawPath(using: .stroke)
          //Swift.print("GraphArray drawPath end")
-      
    }
    
    
