@@ -4,4 +4,4 @@
 
 #import "hid.h"
 #import "rVertikalanzeige.h"
-#import "rDatenlegende.h"
+//#import "rDatenlegende.h"

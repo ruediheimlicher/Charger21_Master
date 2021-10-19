@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BD3E0A3326E69667007E7795 /* rDatenlegende.m in Sources */ = {isa = PBXBuildFile; fileRef = BD3E0A3226E69667007E7795 /* rDatenlegende.m */; };
 		BD3E0A3926E75C1B007E7795 /* datenlegende.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD3E0A3826E75C1B007E7795 /* datenlegende.swift */; };
 		BD56F74A26BC6CD10033C18F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F74926BC6CD10033C18F /* AppDelegate.swift */; };
 		BD56F74C26BC6CD10033C18F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD56F74B26BC6CD10033C18F /* ViewController.swift */; };
@@ -64,8 +63,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		BD3E0A3126E69667007E7795 /* rDatenlegende.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rDatenlegende.h; sourceTree = SOURCE_ROOT; };
-		BD3E0A3226E69667007E7795 /* rDatenlegende.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = rDatenlegende.m; sourceTree = SOURCE_ROOT; };
 		BD3E0A3726E69845007E7795 /* Charger21_Master-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Charger21_Master-Bridging-Header.h"; sourceTree = "<group>"; };
 		BD3E0A3826E75C1B007E7795 /* datenlegende.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = datenlegende.swift; sourceTree = "<group>"; };
 		BD56F74626BC6CD10033C18F /* Charger21_Master.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Charger21_Master.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -207,8 +204,6 @@
 			isa = PBXGroup;
 			children = (
 				BD3E0A3826E75C1B007E7795 /* datenlegende.swift */,
-				BD3E0A3126E69667007E7795 /* rDatenlegende.h */,
-				BD3E0A3226E69667007E7795 /* rDatenlegende.m */,
 				BD3E0A3626E69845007E7795 /* Source */,
 				BD56F80426BD6E920033C18F /* hid.m */,
 				BD56F78326BC6E070033C18F /* hid.h */,
@@ -421,7 +416,6 @@
 			files = (
 				BD56F80526BD6E920033C18F /* hid.m in Sources */,
 				BD56F74C26BC6CD10033C18F /* ViewController.swift in Sources */,
-				BD3E0A3326E69667007E7795 /* rDatenlegende.m in Sources */,
 				BD56F74A26BC6CD10033C18F /* AppDelegate.swift in Sources */,
 				BD56F78426BC6E070033C18F /* usb.swift in Sources */,
 				BD56F74F26BC6CD10033C18F /* Charger21_Master.xcdatamodeld in Sources */,

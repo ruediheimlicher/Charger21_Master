@@ -1250,7 +1250,7 @@ extension DataPlot
          return
       }
       let ru = datenlegende.randunten
-      Swift.print("randunten: \(ru)")
+      //Swift.print("randunten: \(ru)")
       //Swift.print("GraphArray: \n\(GraphArray)")
       
       var path = CGMutablePath()
@@ -1417,26 +1417,24 @@ extension DataPlot
          //Swift.print("diagramm cp x: \(cp.x)")
          }
       } // for i <12
-      print("miny: \(miny) maxy: \(maxy)")
+      //print("miny: \(miny) maxy: \(maxy)")
       //print("miny: \(miny) maxy: \(maxy) legendearray: \(legendearray)")
       //print("legendearray unsorted: \(legendearray)")
       legendearray = legendearray.sorted(by: { $0["wert"] ?? 0 < $1["wert"] ?? 0 })
-      print("legendearray sorted wert: \(legendearray)")
-      
+      //print("legendearray sorted wert:")
       for legendelinie  in legendearray
       {
-         print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0)")
+         //print("index: \t\(legendelinie["index"] ?? 0) \twert: \t\(s2(legendelinie["wert"] ?? 0))\t legendeposition: \t\(s2(legendelinie["legendeposition"] ?? 0))")
       }
       if legendearray.count == 0
       {
-         print("legendearray.count")
+         print("legendearray.count ist 0")
          return
       }
       datenlegende.setLegendearray(legendearray: legendearray)
  
-       //MARK: end datenlegende      
       legendearray = datenlegende.legendearray() // legendedicarray:[[String:CGFloat]] = [[:]]   
-      print("LegendeArray nach setLegendeArray: \(legendearray)")      
+      //print("LegendeArray nach setLegendeArray: \(legendearray)")      
       legendearray.sort(by: { ($0["index"] ?? 0) < ($1["index"] ?? 0) })      
 //      print("legendearray sorted index: \(legendearray)")      
       legendearray[0]["wert"] = 0      
@@ -1449,9 +1447,9 @@ extension DataPlot
          //print("legendearray line: \(line)")
          legendeordinatenarray.append(line["legendeposition"] ?? 0)
       }
-      print("legendeordinatenarray: \(legendeordinatenarray)")      
-
+      //print("legendeordinatenarray: \(legendeordinatenarray)")   
       
+      //MARK: GraphArray   
       for i in  0..<GraphArray.count
       {
          if (GraphArray[i].isEmpty)

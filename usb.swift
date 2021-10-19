@@ -172,7 +172,7 @@ open class usb_teensy: NSObject
       if (xcont == true)
       {
          var timer : Timer? = nil
-         timer = Timer.scheduledTimer(timeInterval: 0.2, target: self, selector: #selector(usb_teensy.cont_read_USB(_:)), userInfo: timerDic, repeats: true)
+         timer = Timer.scheduledTimer(timeInterval: 0.4, target: self, selector: #selector(usb_teensy.cont_read_USB(_:)), userInfo: timerDic, repeats: true)
       }
       return Int(result) //
    }

@@ -269,12 +269,16 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let  U_O_H_BYTE = 19
    let  I_SHUNT_L_BYTE = 20
    let  I_SHUNT_H_BYTE = 21
+   
 
    let   TEMP_SOURCE_L_BYTE = 24
    let   TEMP_SOURCE_H_BYTE = 25
 
    let   TEMP_BATT_L_BYTE = 26
    let   TEMP_BATT_H_BYTE = 27
+
+   let BALANCE_L_BYTE  = 28
+   let BALANCE_H_BYTE  = 29
 
  
    // bits von masterstatus
@@ -366,6 +370,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    @IBOutlet  weak  var TempBattFeld: NSTextField!
  
    @IBOutlet  weak  var inputDataFeld: NSTextView!
+   
+   @IBOutlet  weak  var BalanceDataFeld: NSTextField!
+   @IBOutlet  weak  var BalanceIndikator: NSLevelIndicator!
    
 /*
     @IBOutlet  var write_sd_startblock: NSTextField!
@@ -513,7 +520,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       IntervallPop.selectItem(at:0)
       ZeitkompressionPop.removeAllItems()
       ZeitkompressionPop.addItems(withTitles:["1.0","0.5","0.2","0.1","0.05","0.01","2","5","10"])
-      ZeitkompressionPop.selectItem(at:0)
+      ZeitkompressionPop.selectItem(at:3)
 
       let mayorteiley = 5
       
@@ -1662,6 +1669,18 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
           
          
          var temparray:[UInt8] = []
+         
+         // Balancer
+         let Balance_LO = UInt16(teensy.read_byteArray[BALANCE_L_BYTE  + DATA_START_BYTE])
+         let Balance_HI = UInt16(teensy.read_byteArray[BALANCE_H_BYTE  + DATA_START_BYTE])
+         
+         let Balancewert = CGFloat(Balance_LO | (Balance_HI<<8))
+
+         print("Balancewert: \(s2(Balancewert))")
+         
+         BalanceDataFeld.integerValue = Int(Balancewert)
+         BalanceIndikator.integerValue = Int(Balancewert)
+         
          for pos in DATA_START_BYTE..<BUFFER_SIZE
          {
             temparray.append(teensy.read_byteArray[pos]) // DATA-Bereich schreiben
