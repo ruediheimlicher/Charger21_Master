@@ -189,7 +189,7 @@ class rDatenlegende:NSObject
    
    {
       //legendearray:  dics mit index und wert fuer jeden datenpunkt, geordnet nach groesse
-      print("*****************  setlegendearray start\n")
+    //  print("*****************  setlegendearray start\n")
       var clusterarray:[[[String:CGFloat]]] = [[[:]]] // arrays von werten mit zu kleinem abstand
       //clusterarray.append([["index":0],["wert":0]])
       // Array mit Dics zu jedem Cluster: Array mit Elementen, abstaende usw,
@@ -311,7 +311,7 @@ class rDatenlegende:NSObject
                {
                   if !clusterindexset.contains(k)
                   {
-                     print("i: \(i) k: \(k) index: \(tempindex) weiteres Element gefunden oben")
+                    // print("i: \(i) k: \(k) index: \(tempindex) weiteres Element gefunden oben")
                      wertsumme += tempwert
                      anzclusterelemente += 1
         //             mitte = (mindicO["wert"]! + mindicU["wert"]! + tempwert) / CGFloat(anzclusterelemente)
@@ -401,7 +401,7 @@ class rDatenlegende:NSObject
             }
             */
             //print("B ***")
-            print("i: \t\(i)\t clusterO: \t\(s2(clusterO)) \tclusterU: \t\(s2(clusterU))  \tclusterH: \t\(s2(clusterH)) \tmitte: \t\(s2(mitte))")
+            //print("i: \t\(i)\t clusterO: \t\(s2(clusterO)) \tclusterU: \t\(s2(clusterU))  \tclusterH: \t\(s2(clusterH)) \tmitte: \t\(s2(mitte))")
 
             for clusterzeile in tempclusterdicarray
             {
@@ -655,7 +655,7 @@ class rDatenlegende:NSObject
  //           print("zeile \(k) verschiebung: \(verschiebung) tempabstandvor: \(tempabstandvor) mindistanz: \(mindistanz)")
             if verschiebung > tempabstandvor - mindistanz // Verschiebung abzueglich zweimal halbe Minimaldistanz
             {
-               print("verschiebung zu gross")
+               //print("verschiebung zu gross")
                verschiebung = tempabstandvor-mindistanz
             }
             
@@ -680,15 +680,15 @@ class rDatenlegende:NSObject
    
    {
       //legendearray:  dics mit index und wert fuer jeden datenpunkt, geordnet nach groesse
-      print("\n\n*****************  setlegendearray start")
+      //print("\n\n*****************  setlegendearray start")
       var clusterarray:[[[String:CGFloat]]] = [[[:]]] // arrays von werten mit zu kleinem abstand
       //clusterarray.append([["index":0],["wert":0]])
       // Array mit Dics zu jedem Cluster: Array mit Elementen, abstaende usw,
       
-      for legendelinie  in legendearray
-      {
-         print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0) ")
-      }
+      //for legendelinie  in legendearray
+      //{
+         //print("index: \(legendelinie["index"] ?? 0) wert: \(legendelinie["wert"] ?? 0) ")
+      //}
       
       legendedicarray = Array(repeating:["String":0],count:legendearray.count)
 
@@ -812,7 +812,7 @@ class rDatenlegende:NSObject
                {
                   if !clusterindexset.contains(k)
                   {
-                     print("i: \(i) k: \(k) weiteres Element gefunden oben")
+                    // print("i: \(i) k: \(k) weiteres Element gefunden oben")
                      wertsumme += tempwert
                      anzclusterelemente += 1
         //             mitte = (mindicO["wert"]! + mindicU["wert"]! + tempwert) / CGFloat(anzclusterelemente)
@@ -846,7 +846,7 @@ class rDatenlegende:NSObject
                {
                   if !clusterindexset.contains(m)
                   {
-                     print("i: \(i) m: \(m) weiteres Element gefunden unten")
+                     //print("i: \(i) m: \(m) weiteres Element gefunden unten")
                      wertsumme += tempwert
                      anzclusterelemente += 1
                      var templegendeelement = legendearray[m]
@@ -866,7 +866,7 @@ class rDatenlegende:NSObject
                m -= 1
             } // while m
             
-            print("\ni: \(i)\t clusterO: \t\(s2(clusterO)) \tclusterU: \t\(s2(clusterU))  \tclusterH: \t\(s2(clusterH)) mitte: \t\(s2(mitte))")
+            //print("\ni: \(i)\t clusterO: \t\(s2(clusterO)) \tclusterU: \t\(s2(clusterU))  \tclusterH: \t\(s2(clusterH)) mitte: \t\(s2(mitte))")
 
            //  \(tempclusterdicarray)  clusterindex:\(clusterindex) clusterO: \(s2(clusterO))  clusterU: \(s2(clusterU))")
             
@@ -884,7 +884,7 @@ class rDatenlegende:NSObject
             let newmitte = wertsumme / CGFloat(anzclusterelemente)
             let verschiebung = mitte - (wertsumme / CGFloat(anzclusterelemente))
             
-            print("i: \(i) clusterindex: \(clusterindex) i: \(i) wertsumme: \(s2(wertsumme)) mitte: \(s2(mitte)) newmitte: \(s2(newmitte)) clusterU: \(s2(clusterU)) verschiebung: \(s2(verschiebung))")
+            //print("i: \(i) clusterindex: \(clusterindex) i: \(i) wertsumme: \(s2(wertsumme)) mitte: \(s2(mitte)) newmitte: \(s2(newmitte)) clusterU: \(s2(clusterU)) verschiebung: \(s2(verschiebung))")
             
             
             m = i-2 // Werte vor i, rueckwaerts

@@ -627,7 +627,7 @@ class DataPlot: NSView
  //     {
         // Swift.print("*\(zeile)*");
  //     }
-      Swift.print("majorTeileArray: \(majorTeileArray)")
+      //Swift.print("majorTeileArray: \(majorTeileArray)")
       //wertesammlungarray.append(werteArray)
       var AnzeigeFaktor:CGFloat = 1.0 //= maxSortenwert/maxAnzeigewert;
       var SortenFaktor:CGFloat = 1.0

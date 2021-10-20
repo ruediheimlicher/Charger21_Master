@@ -127,6 +127,12 @@ class Abszisse: NSView{
       
    }
    
+   override func updateLayer() {
+      self.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
+
+      // Other updates.
+   }
+   
    func PlotRect() -> CGRect
    {
       Swift.print("ordinate PlotRect bounds: \(bounds)")

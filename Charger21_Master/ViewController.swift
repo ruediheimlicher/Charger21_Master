@@ -214,6 +214,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let MESSUNG_DATA    =  0xB1 // Setzen der Settings fuer die Messungen
 
    
+   
+   
+   
+   
+   
    var isdownloading = 0;
    let LOGGER_START     =     0xA0
    let LOGGER_CONT      =     0xA1
@@ -259,8 +264,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let STROM_A_L_BYTE  = 8
    let STROM_A_H_BYTE  = 9
    
-   let STROM_B_L_BYTE  = 10
-   let STROM_B_H_BYTE  = 11
+   let MAX_STROM_L_BYTE  = 10
+   let MAX_STROM_H_BYTE  = 11
    
    // recv
    let  U_M_L_BYTE = 16
@@ -297,6 +302,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let READ_START   =   0xCA // Start read
 
    let STROM_SET     =     0x88
+   let MAX_STROM_SET     =     0x90
+   
    
    let SAVE_SD_RUN = 0x02 // Bit 1
    let SAVE_SD_STOP = 0x04 // Bit 2
@@ -306,7 +313,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
 
    // teensy
    //ADC
-
+   let SPANNUNG_KORRFAKTOR:Float = 1.47
    let DEVICE_BYTE = 0
 
    let BATT_MIN = 2.8
@@ -321,7 +328,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let DIGI0 = 13    // Digi Eingang
    let DIGI1 = 14   // Digi Eingang
 
- 
+ // Maximalwerte
+   let STROM_MAX = 1024
+   let STROM_MID = 512
    // Outlets
    // Diagramm
    @IBOutlet  weak  var datagraph: DataPlot!
@@ -461,6 +470,13 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    @IBOutlet  weak  var StromSlider: NSSlider!
    @IBOutlet  weak  var StromStepper: NSStepper!
    @IBOutlet  weak  var StromFeld: NSTextField!
+
+// Max Strom
+   @IBOutlet  weak  var MaxStromSlider: NSSlider!
+   @IBOutlet  weak  var MaxStromStepper: NSStepper!
+   @IBOutlet  weak  var MaxStromFeld: NSTextField!
+
+
    
    @IBOutlet  weak  var StromIndikator: NSLevelIndicator!
    
@@ -609,8 +625,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       bereichDic ["temperatur"] = ["0-100","0-150","-30-150"]
       bereichDic ["ADC 12Bit"] = ["0 - 8V","0-16V"]
 
-
-      
+      MaxStromStepper.integerValue = STROM_MID
+      MaxStromSlider.integerValue = STROM_MID
+      MaxStromFeld.integerValue = STROM_MID
       //MARK: -   datagraph
       
       
@@ -845,7 +862,46 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       
       return anzahl
    }
+// Max Werte
+   @IBAction func reportMaxStromSlider(_ sender: NSSlider)
+   {
+      //print("reportMaxStromSlider index: \(sender.intValue)")
+      let strom = sender.intValue
+      MaxStromFeld.integerValue = Int(sender.doubleValue) 
+      teensy.write_byteArray[TASK_BYTE] = UInt8(MAX_STROM_SET)
+      teensy.write_byteArray[MAX_STROM_H_BYTE] = UInt8((strom & 0xFF00) >> 8) // hb
+      teensy.write_byteArray[MAX_STROM_L_BYTE] = UInt8((strom & 0x00FF) & 0xFF) // lb
+      MaxStromStepper.integerValue = Int(sender.doubleValue) 
+      
+      var senderfolg = 0
+      if (usbstatus > 0)
+      {
+         senderfolg = Int(teensy.send_USB())
+      }
+      //StromIndikator.integerValue = Int(strom)
+      //print("reportStromSlider senderfolg: \(senderfolg)")
+   }//
 
+   @IBAction func reportMaxStromStepper(_ sender: NSStepper)// Obere Grenze
+   {
+      print("reportMaxStromStepper IntVal: \(sender.integerValue)")
+ 
+      let intpos = sender.integerValue 
+      //StromStepper_H_Feld.integerValue = intpos
+      teensy.write_byteArray[TASK_BYTE] = UInt8(MAX_STROM_SET)
+      teensy.write_byteArray[MAX_STROM_H_BYTE] = UInt8((intpos & 0xFF00) >> 8) // hb
+      teensy.write_byteArray[MAX_STROM_L_BYTE] = UInt8((intpos & 0x00FF) & 0xFF) // lb
+      var senderfolg = 0
+      if (usbstatus > 0)
+      {
+         senderfolg = Int(teensy.send_USB())
+      }
+      MaxStromFeld.integerValue = intpos
+      MaxStromSlider.integerValue = Int(sender.doubleValue) 
+      
+      print("reportStromStepper StromSlider.integerValue: \(StromSlider.integerValue)")
+      
+   }
    
    //MARK: Charger
    @IBAction func reportStromSlider(_ sender: NSSlider)
@@ -939,7 +995,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          //print("start_messung start ")
          
          setSettings()
+          // Max Strom setzen
+         let maxstrom = MaxStromFeld.integerValue 
          
+         teensy.write_byteArray[MAX_STROM_H_BYTE] = UInt8((maxstrom & 0xFF00) >> 8) // hb
+         teensy.write_byteArray[MAX_STROM_L_BYTE] = UInt8((maxstrom & 0x00FF) & 0xFF) // lb
+    
          // Sichern auf SD?
          var save_SD = save_SD_check?.state.rawValue
          if (save_SD == 0)
@@ -1399,7 +1460,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       //let lastData = teensy.getlastDataRead()
       let lastData = info?["data"] as! [UInt8]
       
-      print("\n***   newLoggerDataAktion lastData: \(String(format:"%02X",lastData[0]))  \(lastData[16 + DATA_START_BYTE])  \(lastData[17 + DATA_START_BYTE])  \(lastData[18 + DATA_START_BYTE]) \(lastData[19 + DATA_START_BYTE])")
+      //print("\n***   newLoggerDataAktion lastData: \(String(format:"%02X",lastData[0]))  \(lastData[16 + DATA_START_BYTE])  \(lastData[17 + DATA_START_BYTE])  \(lastData[18 + DATA_START_BYTE]) \(lastData[19 + DATA_START_BYTE])")
       taskcode = Int(lastData[0])
       let taskcodestring = String(taskcode)
  //     inputDataFeld.string = inputDataFeld.string  + taskcodestring + " ***\n"
@@ -1498,7 +1559,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          var devicenummer = Int((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0x0F // Device, 1-4
          let datacode = (Int32((teensy.read_byteArray[DEVICE_BYTE + DATA_START_BYTE])) & 0xF0) >> 4   // Code fuer Datenbereich
-         print("TEENSY_DATA datacode: \(datacode)") // bit 3-5: Bits fuer Spannung, Strom, Temperatur. alle ON: datacode ist 7
+         //print("TEENSY_DATA datacode: \(datacode)") // bit 3-5: Bits fuer Spannung, Strom, Temperatur. alle ON: datacode ist 7
          
          devicenummer &= 0x0F
          let wl_callback_status = UInt8(teensy.read_byteArray[2])
@@ -1641,9 +1702,19 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let I_A_float = Float(I_A)
          print("Strom float: \(I_A_float)")
          
+   // shunt      
+         // Strom
+         let I_SHUNT_LO = UInt16(teensy.read_byteArray[I_SHUNT_L_BYTE  + DATA_START_BYTE])
+         let I_SHUNT_HI = UInt16(teensy.read_byteArray[I_SHUNT_H_BYTE  + DATA_START_BYTE])
+         print("TEENSY_DATA Strom Shunt  I_SHUNT_LO: \(I_SHUNT_LO) I_SHUNT_HI: \(I_SHUNT_HI) ")
+         let I_SHUNT = I_SHUNT_LO | (I_SHUNT_HI<<8)
+         print("Strom Shunt: \(I_SHUNT)")
+ 
+         
+         
          // Strom B
-         let I_B_LO = UInt16(teensy.read_byteArray[STROM_B_L_BYTE  + DATA_START_BYTE])
-         let I_B_HI = UInt16(teensy.read_byteArray[STROM_B_H_BYTE  + DATA_START_BYTE])
+         let I_B_LO = UInt16(teensy.read_byteArray[BALANCE_L_BYTE  + DATA_START_BYTE])
+         let I_B_HI = UInt16(teensy.read_byteArray[BALANCE_H_BYTE  + DATA_START_BYTE])
          print("TEENSY_DATA Strom B I_B_LO: \(I_B_LO) I_B_HI: \(I_B_HI) ")
          let I_B = I_B_LO | (I_B_HI<<8)
          print("Strom B: \(I_B)")
@@ -1657,7 +1728,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
          let Temp_Source_HI = UInt16(teensy.read_byteArray[TEMP_SOURCE_H_BYTE  + DATA_START_BYTE])
          let Temp_Source = Temp_Source_LO | (Temp_Source_HI<<8)
- //        print("Temp_Source: \(Temp_Source)")
+         print("Temp_Source: \(Temp_Source)")
          TempSourceFeld.integerValue = Int(Temp_Source)
                
          // Temperatur BATT
@@ -1674,6 +1745,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let Balance_LO = UInt16(teensy.read_byteArray[BALANCE_L_BYTE  + DATA_START_BYTE])
          let Balance_HI = UInt16(teensy.read_byteArray[BALANCE_H_BYTE  + DATA_START_BYTE])
          
+         let Balance = Balance_LO | (Balance_HI<<8)
          let Balancewert = CGFloat(Balance_LO | (Balance_HI<<8))
 
          print("Balancewert: \(s2(Balancewert))")
@@ -1691,7 +1763,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          messungfloatarray[0][DIAGRAMMDATA_OFFSET + 1] = U_O_float  // DIAGRAMMDATA_OFFSET 4
 
          messungfloatarray[1][DIAGRAMMDATA_OFFSET + 0] = I_A_float
-         messungfloatarray[1][DIAGRAMMDATA_OFFSET + 1] = I_B_float
+         messungfloatarray[1][DIAGRAMMDATA_OFFSET + 1] = Float(Balance)
          
          
          let tempzeit = tagsekunde()
@@ -1766,7 +1838,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                       */
                      // Wert auslesen an pos kanal
                      let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET ] // DIAGRAMMDATA_OFFSET ist 4
-                     print("device: \(dev) kanal: \t\(kanal) \twert raw: \t\(wert)")
+                     //print("device: \(dev) kanal: \t\(kanal) \twert raw: \t\(wert)")
                      var wert_norm:Float = wert
                      
                      switch deviceID
@@ -1781,7 +1853,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               print("Spannung kanal \(kanal) wert: \(wert)")
                               //wert_norm = wert * 340 / 1024 //Ref 3.
                               let ADC_Spannung = wert * TEENSYVREF / 1024  // Spannung am ADC 
-                              let Eff_Spannung = ADC_Spannung * 1.45 //Umrechnung reale Spannung zu ADC-Eingangsspannung
+                              let Eff_Spannung = ADC_Spannung * SPANNUNG_KORRFAKTOR //Umrechnung reale Spannung zu ADC-Eingangsspannung
                               //SpannungFeld_A.floatValue = 2*ADC_Spannung // ADC-Spannung ist halbiert
                               SpannungFeld_A.floatValue = Eff_Spannung // ADC-Spannung ist halbiert
 
@@ -1815,8 +1887,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                            {
                               print("Spannung kanal \(kanal) wert: \(wert)")
                               //wert_norm = wert * 340 / 1024 //Ref 3.
-                              let ADC_Spannung = wert * TEENSYVREF / 1024  // Spannung am ADC 
-                              let Eff_Spannung = ADC_Spannung * 1.45 //Umrechnung reale Spannung zu ADC-Eingangsspannung
+                              let ADC_Spannung:Float = wert * TEENSYVREF / 1024  // Spannung am ADC 
+                              let Eff_Spannung = ADC_Spannung * SPANNUNG_KORRFAKTOR //Umrechnung reale Spannung zu ADC-Eingangsspannung
                               //SpannungFeld_B.floatValue = 2*ADC_Spannung // ADC-Spannung ist halbiert
                               SpannungFeld_B.floatValue = Eff_Spannung // ADC-Spannung ist halbiert
 
