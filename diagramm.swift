@@ -143,8 +143,8 @@ class DataPlot: NSView
 
          datentitelarray[0] = "U_M"
          datentitelarray[1] = "U_O"
-         datentitelarray[2] = "I_A"
-         datentitelarray[3] = "I_B"
+         datentitelarray[2] = "I_Out"
+         datentitelarray[3] = "I_Bal"
 
          NotificationCenter.default.addObserver(self, selector:#selector(StartAktion(_:)),name:NSNotification.Name(rawValue: "data"),object:nil)
       } // for i

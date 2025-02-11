@@ -1578,7 +1578,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          {
             
             print("\n $$$$$$$$$$$$$$$$$$$$$ ")
-            print(" neue Teensy-Messung Nr: \(messungnummer)  blockcounter: \(blockcounter)")// \t Block: \(blockposition)")
+           print(" neue Teensy-Messung Nr: \(messungnummer)  blockcounter: \(blockcounter)")// \t Block: \(blockposition)")
             print(" $$$$$$$$$$$$$$$$$$$$$$$ \n")
             let contdata = U8ArrayToIntString(arr: lastData)
     //        print("contdata: \(contdata)")
@@ -1618,7 +1618,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
            // print("deviceindex: \(deviceindex) devicelinie: \(devicelinie)") 
             let device = devicelinie["device"]!
             let analog = devicelinie["A"]! // Tastenstatus Kanaele           
-            print ("deviceindex: \(deviceindex) analog: \(analog)")
+            //print ("deviceindex: \(deviceindex) analog: \(analog)")
             //let devicecode = UInt8(deviceindex)
             let oldstatus = Int(swiftArray[deviceindex]["on"]!) // bisheriger status, nur update wenn changed
             //print("oldstatus: \(oldstatus) ")
@@ -1676,7 +1676,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let U_M_norm = U_M_float/1023 // nicht verwendet
      //    Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
         
-         print("\n***\n")
+         //print("\n***")
          //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
 //         print("TEENSY_DATA U_M: \(U_M) U_M_float: \(U_M_float) U_M_norm: \(U_M_norm)")
          
@@ -1685,7 +1685,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
  
          let U_O = U_O_LO | (U_O_HI<<8)
          let U_O_float = Float(U_O) 
-         print("Spannung O: \(U_O)")
+        // print("Spannung O: \(U_O) float: \(U_O_float)")
     //     let U_O_norm = U_O_float*0xFF/1023 // Normiert auf 0xFF
          //Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
          //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
@@ -1695,18 +1695,18 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          // Strom
          let I_A_LO = UInt16(teensy.read_byteArray[STROM_A_L_BYTE  + DATA_START_BYTE])
          let I_A_HI = UInt16(teensy.read_byteArray[STROM_A_H_BYTE  + DATA_START_BYTE])
-         print("TEENSY_DATA Strom  I_A_LO: \(I_A_LO) I_A_HI: \(I_A_HI) ")
+         //print("TEENSY_DATA Strom  I_A_LO: \(I_A_LO) I_A_HI: \(I_A_HI) ")
          let I_A = I_A_LO | (I_A_HI<<8)
-         print("Strom: \(I_A)")
+         //print("Strom: \(I_A)")
          stromMFeld.integerValue = Int(I_A)
          let I_A_float = Float(I_A)
-         print("Strom float: \(I_A_float)")
+         print("Strom raw: \(I_A) float: \(I_A_float)")
          
    // shunt      
          // Strom
          let I_SHUNT_LO = UInt16(teensy.read_byteArray[I_SHUNT_L_BYTE  + DATA_START_BYTE])
          let I_SHUNT_HI = UInt16(teensy.read_byteArray[I_SHUNT_H_BYTE  + DATA_START_BYTE])
-         print("TEENSY_DATA Strom Shunt  I_SHUNT_LO: \(I_SHUNT_LO) I_SHUNT_HI: \(I_SHUNT_HI) ")
+         //print("TEENSY_DATA Strom Shunt  I_SHUNT_LO: \(I_SHUNT_LO) I_SHUNT_HI: \(I_SHUNT_HI) ")
          let I_SHUNT = I_SHUNT_LO | (I_SHUNT_HI<<8)
          print("Strom Shunt: \(I_SHUNT)")
  
@@ -1715,12 +1715,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          // Strom B
          let I_B_LO = UInt16(teensy.read_byteArray[BALANCE_L_BYTE  + DATA_START_BYTE])
          let I_B_HI = UInt16(teensy.read_byteArray[BALANCE_H_BYTE  + DATA_START_BYTE])
-         print("TEENSY_DATA Strom B I_B_LO: \(I_B_LO) I_B_HI: \(I_B_HI) ")
+         //print("TEENSY_DATA Strom B I_B_LO: \(I_B_LO) I_B_HI: \(I_B_HI) ")
          let I_B = I_B_LO | (I_B_HI<<8)
-         print("Strom B: \(I_B)")
+         //print("Strom B: \(I_B)")
          stromOFeld.integerValue = Int(I_B)
          let I_B_float = Float(I_B)
-         print("Strom B float: \(I_B_float)")
+         print("Strom Balance raw: \(I_B) float: \(I_B_float)")
 
          
          
@@ -1728,8 +1728,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
          let Temp_Source_HI = UInt16(teensy.read_byteArray[TEMP_SOURCE_H_BYTE  + DATA_START_BYTE])
          let Temp_Source = Temp_Source_LO | (Temp_Source_HI<<8)
-         print("Temp_Source: \(Temp_Source)")
-         TempSourceFeld.integerValue = Int(Temp_Source)
+         //print("Temp_Source: \(Temp_Source)")
+         TempSourceFeld.integerValue = Int(Temp_Source/2)
                
          // Temperatur BATT
          let Temp_Batt_LO = UInt16(teensy.read_byteArray[TEMP_BATT_L_BYTE  + DATA_START_BYTE])
@@ -1748,7 +1748,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let Balance = Balance_LO | (Balance_HI<<8)
          let Balancewert = CGFloat(Balance_LO | (Balance_HI<<8))
 
-         print("Balancewert: \(s2(Balancewert))")
+         //print("Balancewert: \(s2(Balancewert))")
          
          BalanceDataFeld.integerValue = Int(Balancewert)
          BalanceIndikator.integerValue = Int(Balancewert)
@@ -1850,10 +1850,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                            stellen = 2
                            if (kanal == 0 || kanal == 1) // 5V, 
                            {
-                              print("Spannung kanal \(kanal) wert: \(wert)")
                               //wert_norm = wert * 340 / 1024 //Ref 3.
                               let ADC_Spannung = wert * TEENSYVREF / 1024  // Spannung am ADC 
                               let Eff_Spannung = ADC_Spannung * SPANNUNG_KORRFAKTOR //Umrechnung reale Spannung zu ADC-Eingangsspannung
+                              print("Spannung kanal \(kanal) wert: \(wert) Eff_Spannung: \(Eff_Spannung)")
+
                               //SpannungFeld_A.floatValue = 2*ADC_Spannung // ADC-Spannung ist halbiert
                               SpannungFeld_A.floatValue = Eff_Spannung // ADC-Spannung ist halbiert
 
@@ -1865,6 +1866,26 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               {
                                  wert_norm = BATT_MAX
                                  loadstatus |= (1<<BATT_MAX_BIT)
+                                 
+                                 let warnung = NSAlert.init()
+                                 warnung.messageText = "Spannung > BATT_MAX"
+                                 warnung.addButton(withTitle: "OK")
+                              
+                                 let antwort = warnung.runModal()
+                                 switch (antwort)
+                                 {
+                                 case .alertFirstButtonReturn: // first button
+                                    print("FirstButton")
+                                    return;
+                                 case .alertSecondButtonReturn: 
+                                    print("SecondButton")
+                                    return;     
+                                 default:
+                                    return
+                                                      
+                                 }
+                                  
+                                 
                                  
                               }
                               /*
@@ -1889,7 +1910,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               //wert_norm = wert * 340 / 1024 //Ref 3.
                               let ADC_Spannung:Float = wert * TEENSYVREF / 1024  // Spannung am ADC 
                               let Eff_Spannung = ADC_Spannung * SPANNUNG_KORRFAKTOR //Umrechnung reale Spannung zu ADC-Eingangsspannung
+                              
                               //SpannungFeld_B.floatValue = 2*ADC_Spannung // ADC-Spannung ist halbiert
+                              print("Spannung kanal \(kanal) wert: \(wert) Eff_Spannung: \(Eff_Spannung)")
                               SpannungFeld_B.floatValue = Eff_Spannung // ADC-Spannung ist halbiert
 
                               
@@ -2140,6 +2163,29 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          //print("counter Messung start: \(messungnummer.intValue) messungnummer wird 0")
          print("\nend MESSUNG_START\n")
          break
+         
+      // ****************************************************************************
+      // MARK: MESSUNG_STOP
+      // ****************************************************************************
+      case MESSUNG_STOP: // Rhttps://www.youtube.com/watch?v=SdL55HWNPRMueckmeldung vom Teensy
+         print("\n  **************************************************************************** ")
+         print("\ncode ist MESSUNG_STOP")
+         let bufsize = BUFFER_SIZE-1
+         print("lastbyte: \(teensy.read_byteArray[BUFFER_SIZE - 1])")
+         
+         teensy.report_stop_read_USB()
+         
+         Start_Messung.state = convertToNSControlStateValue(0)
+         
+         //masterstatus |= (1<<MESSUNG_RUN) // Messung lauft, Daten kommen im Intervalltakt
+         print("teensy.read_byteArray")
+         printarray(arr:teensy.read_byteArray)
+         //print("\t\(teensy.read_byteArray)")
+         //print("counter Messung start: \(messungnummer.intValue) messungnummer wird 0")
+         print("\nend MESSUNG_STOP\n")
+         break
+ 
+         
          
       // ****************************************************************************
       // MARK: MESSUNG_DATA
@@ -2740,7 +2786,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       
       //let dic = notification.userInfo as? [String:[UInt8]]
       //print("dic: \(dic ?? ["a":[123]])\n")
-   print("newLoggerDataAktion end")
+   //print("newLoggerDataAktion end")
    }
    
    func printarray(arr:[UInt8])
@@ -2948,6 +2994,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       print("reportAktivKanalSeg  tag: \(aktivtag) aktivstatus: \(aktivstatus)")
    }
     
+   
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any?
     {
        

@@ -80,8 +80,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "159"
             endingLineNumber = "159"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "start_read_USB(_:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -222,8 +222,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2623"
-            endingLineNumber = "2623"
+            startingLineNumber = "2669"
+            endingLineNumber = "2669"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -238,8 +238,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2581"
-            endingLineNumber = "2581"
+            startingLineNumber = "2627"
+            endingLineNumber = "2627"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -286,8 +286,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2040"
-            endingLineNumber = "2040"
+            startingLineNumber = "2063"
+            endingLineNumber = "2063"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -382,8 +382,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3218"
-            endingLineNumber = "3218"
+            startingLineNumber = "3264"
+            endingLineNumber = "3264"
             landmarkName = "tableView(_:viewFor:row:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -398,8 +398,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3226"
-            endingLineNumber = "3226"
+            startingLineNumber = "3272"
+            endingLineNumber = "3272"
             landmarkName = "tableView(_:viewFor:row:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -510,8 +510,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2531"
-            endingLineNumber = "2531"
+            startingLineNumber = "2577"
+            endingLineNumber = "2577"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -526,8 +526,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2031"
-            endingLineNumber = "2031"
+            startingLineNumber = "2054"
+            endingLineNumber = "2054"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -542,8 +542,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2305"
-            endingLineNumber = "2305"
+            startingLineNumber = "2351"
+            endingLineNumber = "2351"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -558,8 +558,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2001"
-            endingLineNumber = "2001"
+            startingLineNumber = "2024"
+            endingLineNumber = "2024"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -574,8 +574,8 @@
             filePath = "Charger21_Master/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2019"
-            endingLineNumber = "2019"
+            startingLineNumber = "2042"
+            endingLineNumber = "2042"
             landmarkName = "newLoggerDataAktion(_:)"
             landmarkType = "7">
          </BreakpointContent>
