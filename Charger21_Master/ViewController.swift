@@ -830,6 +830,20 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          //manufactorername = teensy.manustring
          usbstatus = 1
          Start_Messung.isEnabled = true
+         
+         let readerr = self.teensy.start_read_USB(true)
+         if (readerr == 0)
+         {
+            print("Fehler in report_start_ladung")
+            NSSound(named: NSSound.Name("Frog"))?.play() 
+         }
+         else
+         {
+            print("report_start_read_USB OK readerr: \(readerr)")
+            NSSound(named: NSSound.Name("Frog"))?.play() 
+         }
+          
+ 
       }
       else
       {
@@ -982,8 +996,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          messungnummerFeld.intValue = 0
          messungnummer = 0
          //teensybatt.stringValue = "0"
-         inputDataFeldstring = ""
-         inputDataFeld.string = inputDataFeldstring
+         
          //print("start_messung start ")
          blockcounterFeld.intValue = 0
          //TaskListe.reloadData() // TableView
@@ -1104,7 +1117,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          }               
          //print("tabstops: \(paragraphStyle.tabStops)")
          
-         let tempstring = "Messung tagsekunde: \(zeit)\n"
+         let tempstring = "Messung tagminute: \(zeit/60)\n"
          //inputDataFeld.string = "Messung tagsekunde: \(zeit)\n"
          
          let attrdatatext = NSMutableAttributedString(string: tempstring)
@@ -1530,7 +1543,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       // 
       //MARK: TEENSY_DATA
       case TEENSY_DATA: // Data vom Teensy
-        // print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
+         print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
          //print("code ist TEENSY_DATA masterstatus: \(masterstatus)")
         // print("TEENSY CODE 0-7: ")
          let sub = Array(lastData[0...7]) // as [UInt8]
@@ -1564,7 +1577,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          devicenummer &= 0x0F
          let wl_callback_status = UInt8(teensy.read_byteArray[2])
          //print("wl_callback_status: \(wl_callback_status)")
-         if (messungnummerFeld.intValue == 0) // erste Messung von TEENSY
+         if ((messungnummerFeld.intValue == 0) && (Start_Messung.state == .on))  // erste Messung von TEENSY
          {
             print("\n +++++++++++++++++++++++ ")
             print("erste Teensy-Messung ")// \t Block: \(blockposition)")
@@ -1572,22 +1585,24 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             let firstdata = U8ArrayToIntString(arr: lastData)
             print("firstdata: \(firstdata)")
             messungnummerFeld.integerValue = 0
+            //messungnummer = 0
             inputDataFeldstring = messungnummerFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\n" 
+            
          }
-         if (messungnummerFeld.intValue != messungnummer)
+         if ((messungnummerFeld.intValue != messungnummer)  && (Start_Messung.state == .on)) 
          {
             
             print("\n $$$$$$$$$$$$$$$$$$$$$ ")
-           print(" neue Teensy-Messung Nr: \(messungnummer)  blockcounter: \(blockcounter)")// \t Block: \(blockposition)")
+            print(" neue Teensy-Messung Nr: \(messungnummer)  blockcounter: \(blockcounter)")// \t Block: \(blockposition)")
             print(" $$$$$$$$$$$$$$$$$$$$$$$ \n")
             let contdata = U8ArrayToIntString(arr: lastData)
-    //        print("contdata: \(contdata)")
-           
+            //        print("contdata: \(contdata)")
+            
             messungnummerFeld.integerValue = Int(messungnummer)
             
             devicestatus = 0x01 // teensy ist immer aktiv. Sonst wird inputDatafeld nicht geschrieben (devicestatus == callback_status)
             // String beginnen
-                  inputDataFeldstring = messungnummerFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
+            inputDataFeldstring = messungnummerFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
             
             blockcounterFeld.integerValue = Int(blockcounter)
          }
@@ -1650,12 +1665,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          {
             
             TaskListe.reloadData()
+            print("reloadData")
             
   //          reorderAbszisse()
          }
  
          //MARK: END von MESSUNG_DATA       
             // end von MESSUNG_DATA
+         
          TaskListe.reloadData()
          
          
@@ -1685,7 +1702,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
  
          let U_O = U_O_LO | (U_O_HI<<8)
          let U_O_float = Float(U_O) 
-        // print("Spannung O: \(U_O) float: \(U_O_float)")
+         print("Spannung O: \(U_O) float: \(U_O_float)")
     //     let U_O_norm = U_O_float*0xFF/1023 // Normiert auf 0xFF
          //Vertikalbalken.setLevel(Int32(U_M_float*0xFF/1023))
          //print(" analog0: \(analog0LO) \(analog0HI) teensy0: \(teensy0) teensy0_norm: \(teensy0_norm)")
@@ -1725,18 +1742,27 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          
          // Temperatur SOURCE
+         
+         /*
+          y = -1.2881x + 231.88
+
+
+          */
          let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
          let Temp_Source_HI = UInt16(teensy.read_byteArray[TEMP_SOURCE_H_BYTE  + DATA_START_BYTE])
-         let Temp_Source = Temp_Source_LO | (Temp_Source_HI<<8)
-         //print("Temp_Source: \(Temp_Source)")
-         TempSourceFeld.integerValue = Int(Temp_Source/2)
+         let Temp_Source = Temp_Source_LO //; | (Temp_Source_HI<<8)
+         print("Temp_Source: \(Temp_Source)")
+         let temp_c:Double = 232.0 - 1.2881 * Double(Temp_Source)
+         let temp_text = String(format: "%.1f", temp_c)
+         print("Temp_CELSIUS: \(temp_c)")
+         TempSourceFeld.stringValue = temp_text
                
          // Temperatur BATT
          let Temp_Batt_LO = UInt16(teensy.read_byteArray[TEMP_BATT_L_BYTE  + DATA_START_BYTE])
          let Temp_Batt_HI = UInt16(teensy.read_byteArray[TEMP_BATT_H_BYTE  + DATA_START_BYTE])
          let Temp_Batt = Temp_Batt_LO | (Temp_Batt_HI<<8)
  //        print("Temp_Batt: \(Temp_Batt)")
-         TempBattFeld.integerValue = Int(Temp_Batt)
+         //TempBattFeld.integerValue = Int(Temp_Batt)
           
          
          var temparray:[UInt8] = []
@@ -1822,7 +1848,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                 
                 */
                // Kanaele des device abfragen
-               
+
                for kanal in 0..<4
                {
                   SortenFaktor = 1
@@ -1838,7 +1864,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                       */
                      // Wert auslesen an pos kanal
                      let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET ] // DIAGRAMMDATA_OFFSET ist 4
-                     //print("device: \(dev) kanal: \t\(kanal) \twert raw: \t\(wert)")
+                     print("device: \(dev) kanal: \t\(kanal) \twert raw: \t\(wert)")
                      var wert_norm:Float = wert
                      
                      switch deviceID
@@ -1876,6 +1902,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                                  {
                                  case .alertFirstButtonReturn: // first button
                                     print("FirstButton")
+                                    stop_messung();
                                     return;
                                  case .alertSecondButtonReturn: 
                                     print("SecondButton")
@@ -1906,7 +1933,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                            stellen = 2
                            if (kanal == 0 || kanal == 1) // 5V, 
                            {
-                              print("Spannung kanal \(kanal) wert: \(wert)")
+                              //print("Spannung kanal \(kanal) wert: \(wert)")
                               //wert_norm = wert * 340 / 1024 //Ref 3.
                               let ADC_Spannung:Float = wert * TEENSYVREF / 1024  // Spannung am ADC 
                               let Eff_Spannung = ADC_Spannung * SPANNUNG_KORRFAKTOR //Umrechnung reale Spannung zu ADC-Eingangsspannung
@@ -2055,7 +2082,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          //print("tempinputDataFeldstring: \(tempinputDataFeldstring)")
          
          inputDataFeld.string = inputDataFeld.string + tempinputDataFeldstring + "\n"
-      //https://stackoverflow.com/questions/40478728/appending-text-to-nstextview-in-swift-3
+         //https://stackoverflow.com/questions/40478728/appending-text-to-nstextview-in-swift-3
          //print("werteArray: ***************\n\(werteArray)")
          
          //print("*************** ")

@@ -11,6 +11,8 @@ import Foundation
 import AVFoundation
 import Darwin
 
+import IOKit.hid
+
 // SPI
 var						spistatus=0;
 
@@ -19,6 +21,8 @@ var						spistatus=0;
 let TIMER0_STARTWERT			=		0x80
 let SPI_BUFSIZE		=					48
 let BUFFER_SIZE:Int   = Int(BufferSize())
+
+
 
 
 open class usb_teensy: NSObject
