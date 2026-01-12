@@ -879,7 +879,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
 // Max Werte
    @IBAction func reportMaxStromSlider(_ sender: NSSlider)
    {
-      //print("reportMaxStromSlider index: \(sender.intValue)")
+      print("reportMaxStromSlider index: \(sender.intValue)")
       let strom = sender.intValue
       MaxStromFeld.integerValue = Int(sender.doubleValue) 
       teensy.write_byteArray[TASK_BYTE] = UInt8(MAX_STROM_SET)
@@ -893,7 +893,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          senderfolg = Int(teensy.send_USB())
       }
       //StromIndikator.integerValue = Int(strom)
-      //print("reportStromSlider senderfolg: \(senderfolg)")
+      print("reportMaxStromSlider senderfolg: \(senderfolg)")
    }//
 
    @IBAction func reportMaxStromStepper(_ sender: NSStepper)// Obere Grenze
@@ -913,7 +913,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       MaxStromFeld.integerValue = intpos
       MaxStromSlider.integerValue = Int(sender.doubleValue) 
       
-      print("reportStromStepper StromSlider.integerValue: \(StromSlider.integerValue)")
+      print("reportStromStepper von  StromSlider.integerValue: \(StromSlider.integerValue)")
       
    }
    
@@ -933,7 +933,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          senderfolg = Int(teensy.send_USB())
       }
       StromIndikator.integerValue = Int(strom)
-      //print("reportStromSlider senderfolg: \(senderfolg)")
+      print("reportStromSlider senderfolg: \(senderfolg)")
    }//
 
    
@@ -1180,7 +1180,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       if (usbstatus > 0)
       {
          senderfolg = Int(teensy.send_USB())
-         
+      
       }
        */
       else
@@ -1543,7 +1543,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       // 
       //MARK: TEENSY_DATA
       case TEENSY_DATA: // Data vom Teensy
-         print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
+         //print("newLoggerDataAktion  TEENSY_DATA inputDataFeld: \(inputDataFeld.string)")
          //print("code ist TEENSY_DATA masterstatus: \(masterstatus)")
         // print("TEENSY CODE 0-7: ")
          let sub = Array(lastData[0...7]) // as [UInt8]
@@ -1585,7 +1585,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             let firstdata = U8ArrayToIntString(arr: lastData)
             print("firstdata: \(firstdata)")
             messungnummerFeld.integerValue = 0
+            
             //messungnummer = 0
+            MessungStartzeit = tagsekunde()
             inputDataFeldstring = messungnummerFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\n" 
             
          }
@@ -1597,13 +1599,17 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
             print(" $$$$$$$$$$$$$$$$$$$$$$$ \n")
             let contdata = U8ArrayToIntString(arr: lastData)
             //        print("contdata: \(contdata)")
+            if(messungnummer == 0)
+            {
+               inputDataFeldstring = ""
+            }
             
             messungnummerFeld.integerValue = Int(messungnummer)
             
             devicestatus = 0x01 // teensy ist immer aktiv. Sonst wird inputDatafeld nicht geschrieben (devicestatus == callback_status)
             // String beginnen
             inputDataFeldstring = messungnummerFeld.stringValue  + "\t" + String(tagsekunde()-MessungStartzeit) + "\t" 
-            
+            inputDataFeldstring = ""
             blockcounterFeld.integerValue = Int(blockcounter)
          }
          //MARK: von MESSUNG_DATA
@@ -1665,7 +1671,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          {
             
             TaskListe.reloadData()
-            print("reloadData")
+            
             
   //          reorderAbszisse()
          }
@@ -1839,7 +1845,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                let number = numberFormatter.number(from: mty ?? "1")
                let deviceMajorTeileY = number?.intValue
 
-               //print("deviceID: \(deviceID) device: \(dev) ")
+               print("deviceID: \(deviceID) device: \(dev) ")
                let messungfloatzeilenarray:[Float] = messungfloatarray[deviceID ?? 0]     
                //print("messungfloatzeilenarray dev: \(dev): \(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0]) raw devMayorTeileY: \(deviceMajorTeileY)")
                //print(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0])
@@ -1864,7 +1870,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                       */
                      // Wert auslesen an pos kanal
                      let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET ] // DIAGRAMMDATA_OFFSET ist 4
-                     print("device: \(dev) kanal: \t\(kanal) \twert raw: \t\(wert)")
+                     print("device: \(dev) deviceID: \(deviceID)\t kanal: \t\(kanal) \twert raw: \t\(wert)")
                      var wert_norm:Float = wert
                      
                      switch deviceID
@@ -1948,6 +1954,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               
                               if wert_norm > BATT_MAX
                               {
+                                 print("wert_norm > BATT_MAX")
                                  wert_norm = BATT_MAX
                                  loadstatus |= (1<<BATT_MAX_BIT)
                                  
@@ -1983,7 +1990,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                      case 1: // Strom
                         //let ordinateMajorTeileY = dataAbszisse_Temperatur.AbszisseVorgaben.MajorTeileY
                         //let ordinateNullpunkt = dataAbszisse_Temperatur.AbszisseVorgaben.Nullpunkt
-                        //print("switch  temp deviceID : \(deviceID) kanal: \(kanal)")
+                        print("switch  deviceID : \(deviceID) kanal: \(kanal)")
                         switch kanal
                         {
                         case 0,1: // I_A
@@ -1999,7 +2006,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               
                            AnzeigeFaktor = 1.0 // Anzeige strecken
                               SortenFaktor = 1 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
-                              //print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
+                              print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
                               
                               
                            
@@ -2048,7 +2055,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                         break
                      }// switch device
                      
-                     //print("\t\tdeviceID: \(deviceID)wert_norm: \t\(wert_norm) diagrammkanalindex: \(diagrammkanalindex)")
+                     print("\t\tdeviceID: \(deviceID)wert_norm: \t\(wert_norm) diagrammkanalindex: \(diagrammkanalindex)")
                      tempwerte[diagrammkanalindex] = wert_norm
                      werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID ?? 0), SortenFaktor, AnzeigeFaktor, Float(deviceMajorTeileY ?? 0)]
                  
@@ -2080,14 +2087,17 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          //print("deviceDatastring: \(deviceDatastring)")
          //print("tempinputDataFeldstring: \(tempinputDataFeldstring)")
-         
-         inputDataFeld.string = inputDataFeld.string + tempinputDataFeldstring + "\n"
+         if(Start_Messung.state == .on)
+         {
+            inputDataFeld.string = inputDataFeld.string + tempinputDataFeldstring + "\n"
+         }
          //https://stackoverflow.com/questions/40478728/appending-text-to-nstextview-in-swift-3
          //print("werteArray: ***************\n\(werteArray)")
          
          //print("*************** ")
          // MARK:*** setWerteArray:
          self.datagraph.setWerteArray(werteArray:werteArray,  nullpunktoffset: NullpunktOffset)
+            
          
          let PlatzRechts:Float = 20.0
          // breite des sichtbaren Bereichs
