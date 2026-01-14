@@ -104,6 +104,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
    var loadstatus:UInt8 = 0
    
+   var slaveloadstatus:UInt8 = 0
+   
    var usb_read_cont = false; // kontinuierlich lesen
    var usb_write_cont = false; // kontinuierlich schreiben
    
@@ -256,7 +258,13 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
 
    let HEADER_OFFSET  =    4     // Erstes Byte im Block nach BLOCK_SIZE: Daten, die bei LOGGER_NEXT uebergeben werden
 
+   //Bits von slaveloadstatus
+   let BATT_MAX_BIT  = 0
+   let BATT_MIN_BIT  = 1
+   let BATT_DOWN_BIT =  2
+   let BATT_OFF_BIT  =  3
    
+   let SLAVELOADSTATUS_BYTE  =  32
    
    //MARK: Charger Konstanten
    
@@ -329,8 +337,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let DIGI1 = 14   // Digi Eingang
 
  // Maximalwerte
-   let STROM_MAX = 1024
-   let STROM_MID = 512
+   let STROM_MAX = 1000
+   let STROM_MID = 500
    // Outlets
    // Diagramm
    @IBOutlet  weak  var datagraph: DataPlot!
@@ -468,7 +476,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    
 //MARK: Charger
    @IBOutlet  weak  var StromSlider: NSSlider!
-   @IBOutlet  weak  var StromStepper: NSStepper!
+   //@IBOutlet  weak  var StromStepper: NSStepper!
    @IBOutlet  weak  var StromFeld: NSTextField!
 
 // Max Strom
@@ -628,6 +636,10 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       MaxStromStepper.integerValue = STROM_MID
       MaxStromSlider.integerValue = STROM_MID
       MaxStromFeld.integerValue = STROM_MID
+      StromFeld.integerValue = 0 //STROM_MID
+      StromSlider.maxValue = Double(STROM_MID)
+      StromSlider.numberOfTickMarks = (STROM_MID / 100) + 1
+
       //MARK: -   datagraph
       
       
@@ -880,7 +892,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    @IBAction func reportMaxStromSlider(_ sender: NSSlider)
    {
       print("reportMaxStromSlider index: \(sender.intValue)")
-      let strom = sender.intValue
+      let strom = sender.integerValue
       MaxStromFeld.integerValue = Int(sender.doubleValue) 
       teensy.write_byteArray[TASK_BYTE] = UInt8(MAX_STROM_SET)
       teensy.write_byteArray[MAX_STROM_H_BYTE] = UInt8((strom & 0xFF00) >> 8) // hb
@@ -893,6 +905,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          senderfolg = Int(teensy.send_USB())
       }
       //StromIndikator.integerValue = Int(strom)
+      let sliderpos:Int = StromSlider.integerValue
+      StromSlider.maxValue = Double(strom)
+      StromSlider.integerValue = sliderpos 
+      StromFeld.integerValue = sliderpos
+      StromSlider.numberOfTickMarks = (strom / 50) + 1
+      
       print("reportMaxStromSlider senderfolg: \(senderfolg)")
    }//
 
@@ -912,21 +930,24 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       }
       MaxStromFeld.integerValue = intpos
       MaxStromSlider.integerValue = Int(sender.doubleValue) 
+      StromSlider.maxValue = Double(intpos)
+      StromFeld.integerValue = intpos
+      //StromStepper.maxValue = Double(intpos)
       
-      print("reportStromStepper von  StromSlider.integerValue: \(StromSlider.integerValue)")
+      print("reportMaxStromStepper von  MaxStromSlider.integerValue: \(StromSlider.integerValue)")
       
    }
    
    //MARK: Charger
    @IBAction func reportStromSlider(_ sender: NSSlider)
    {
-      print("reportStromSlider index: \(sender.intValue)")
+      print("reportStromSlider index: \(sender.intValue) max: \(sender.maxValue)")
       let strom = sender.intValue
       StromFeld.integerValue = Int(sender.doubleValue) 
       teensy.write_byteArray[TASK_BYTE] = UInt8(STROM_SET)
       teensy.write_byteArray[STROM_A_H_BYTE] = UInt8((strom & 0xFF00) >> 8) // hb
       teensy.write_byteArray[STROM_A_L_BYTE] = UInt8((strom & 0x00FF) & 0xFF) // lb
-      StromStepper.integerValue = Int(sender.doubleValue) 
+      //StromStepper.integerValue = Int(sender.doubleValue) 
       var senderfolg = 0
       if (usbstatus > 0)
       {
@@ -962,6 +983,21 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    {
       
       print("start_ladung sender: \(sender.state)") // gibt neuen State an
+      
+      if (sender.state.rawValue == 1) 
+      {
+         if(StromFeld.integerValue == 0)
+         {
+            let warnung = NSAlert.init()
+            warnung.messageText = "Ladestrom ist 0"
+            warnung.addButton(withTitle: "OK")
+         
+            let antwort = warnung.runModal()
+            sender.state = .off
+            return
+     
+         }
+
      
       teensy.clear_bytearray()
       
@@ -980,8 +1016,6 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       */
       
       // Messung starten
-      if (sender.state.rawValue == 1) 
-      {
          self.datagraph.DatenArray.removeAll()
          self.datagraph.wertesammlungarray.removeAll()
          self.rawdataarray.removeAll()
@@ -1013,6 +1047,13 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          teensy.write_byteArray[MAX_STROM_H_BYTE] = UInt8((maxstrom & 0xFF00) >> 8) // hb
          teensy.write_byteArray[MAX_STROM_L_BYTE] = UInt8((maxstrom & 0x00FF) & 0xFF) // lb
+         
+         let aktstrom = StromFeld.integerValue
+         
+         teensy.write_byteArray[STROM_A_H_BYTE] = UInt8((aktstrom & 0xFF00) >> 8) // hb
+         teensy.write_byteArray[STROM_A_L_BYTE] = UInt8((aktstrom & 0x00FF) & 0xFF) // lb
+         
+         
     
          // Sichern auf SD?
          var save_SD = save_SD_check?.state.rawValue
@@ -1187,6 +1228,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       {
          
          print("start_messung stop")
+         sender.state = .off
          stop_messung()
       }
       
@@ -1227,7 +1269,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       print("stop_messung") // gibt neuen State an
       //self.datagraph.printwertesammlung()
       
-      teensy.report_stop_read_USB()
+      //teensy.report_stop_read_USB()
    }
   
    
@@ -1618,7 +1660,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
            // print("rawdatazeile read_byteArray. Data ab byte 0")
          //rawdataarray.append(rawdatazeile)
          
-         
+         slaveloadstatus = teensy.read_byteArray[SLAVELOADSTATUS_BYTE];
          if (devicenummer == 0)
          {
             counterLO = Int32(teensy.read_byteArray[DATACOUNT_LO_BYTE])
@@ -1684,7 +1726,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          //   let analog0LO = UInt16(teensy.read_byteArray[ANALOG0  + DATA_START_BYTE])
          //   let analog0HI = UInt16(teensy.read_byteArray [ANALOG0 + 1  + DATA_START_BYTE])
-         
+         print("slaveloadstatus:\(slaveloadstatus)")
          
          // TODO
          let U_M_LO = UInt16(teensy.read_byteArray[U_M_L_BYTE  + DATA_START_BYTE])
@@ -1830,7 +1872,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let tempid = datacode & (1<<TEMP_ID)
  //        print("datacode: \(datacode) spannungid: \(spannungid) stromid: \(stromid) tempid: \(tempid)")
          
-         //MARK: neu
+         //MARK: NEU
          for devicedata in swiftArray
          {
             if (devicedata["on"] == "1") // device vorhanden
@@ -1845,7 +1887,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                let number = numberFormatter.number(from: mty ?? "1")
                let deviceMajorTeileY = number?.intValue
 
-               print("deviceID: \(deviceID) device: \(dev) ")
+               //print("deviceID: \(deviceID) device: \(dev) ")
                let messungfloatzeilenarray:[Float] = messungfloatarray[deviceID ?? 0]     
                //print("messungfloatzeilenarray dev: \(dev): \(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0]) raw devMayorTeileY: \(deviceMajorTeileY)")
                //print(messungfloatzeilenarray[DIAGRAMMDATA_OFFSET+0])
@@ -1870,7 +1912,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                       */
                      // Wert auslesen an pos kanal
                      let wert = messungfloatzeilenarray[Int(kanal) + DIAGRAMMDATA_OFFSET ] // DIAGRAMMDATA_OFFSET ist 4
-                     print("device: \(dev) deviceID: \(deviceID)\t kanal: \t\(kanal) \twert raw: \t\(wert)")
+                     //print("device: \(dev) deviceID: \(deviceID)\t kanal: \t\(kanal) \twert raw: \t\(wert)")
                      var wert_norm:Float = wert
                      
                      switch deviceID
@@ -1878,6 +1920,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                      case 0: // Spannung
                         switch kanal
                         {
+      // MARK: *** CHECK SPANNUNG
                         case 0: // 5V
                            stellen = 2
                            if (kanal == 0 || kanal == 1) // 5V, 
@@ -1898,7 +1941,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               {
                                  wert_norm = BATT_MAX
                                  loadstatus |= (1<<BATT_MAX_BIT)
-                                 
+                                 NSSound.beep()
                                  let warnung = NSAlert.init()
                                  warnung.messageText = "Spannung > BATT_MAX"
                                  warnung.addButton(withTitle: "OK")
@@ -1958,6 +2001,25 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                                  wert_norm = BATT_MAX
                                  loadstatus |= (1<<BATT_MAX_BIT)
                                  
+                                 let warnung = NSAlert.init()
+                                 warnung.messageText = "Spannung > BATT_MAX"
+                                 warnung.addButton(withTitle: "OK")
+                              
+                                 let antwort = warnung.runModal()
+                                 switch (antwort)
+                                 {
+                                 case .alertFirstButtonReturn: // first button
+                                    print("FirstButton")
+                                    stop_messung();
+                                    return;
+                                 case .alertSecondButtonReturn: 
+                                    print("SecondButton")
+                                    return;     
+                                 default:
+                                    return
+                                                      
+                                 }
+                                 
                               }
                               /*
                               let BATT_DOWN = 2.5 // V 
@@ -1987,10 +2049,12 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                         
                         //print("switch  teensy deviceID : \(deviceID) kanal: \(kanal)")
                         break
+                        
+                     // MARK: *** CHECK STROM   
                      case 1: // Strom
                         //let ordinateMajorTeileY = dataAbszisse_Temperatur.AbszisseVorgaben.MajorTeileY
                         //let ordinateNullpunkt = dataAbszisse_Temperatur.AbszisseVorgaben.Nullpunkt
-                        print("switch  deviceID : \(deviceID) kanal: \(kanal)")
+                        //print("switch  deviceID : \(deviceID) kanal: \(kanal)")
                         switch kanal
                         {
                         case 0,1: // I_A
@@ -2006,7 +2070,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               
                            AnzeigeFaktor = 1.0 // Anzeige strecken
                               SortenFaktor = 1 // Anzeige in Diagramm durch Sortenfaktor teilen: Volt kommt mit Faktor 10
-                              print("\n****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
+                              print("\t****      strom kanal: \t\(kanal) wert: \t\(wert)\t wert_norm:\t \(wert_norm)") 
                               
                               
                            
@@ -2055,7 +2119,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                         break
                      }// switch device
                      
-                     print("\t\tdeviceID: \(deviceID)wert_norm: \t\(wert_norm) diagrammkanalindex: \(diagrammkanalindex)")
+                     //print("\t\tdeviceID: \(deviceID)wert_norm: \t\(wert_norm) diagrammkanalindex: \(diagrammkanalindex)")
                      tempwerte[diagrammkanalindex] = wert_norm
                      werteArray[diagrammkanalindex] = [wert_norm, Float(deviceID ?? 0), SortenFaktor, AnzeigeFaktor, Float(deviceMajorTeileY ?? 0)]
                  
@@ -2179,7 +2243,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          }
          
       //MARK:end TEENSY_DATA
-      
+         break;
       
       
       
@@ -2190,7 +2254,6 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       case MESSUNG_START: // Rhttps://www.youtube.com/watch?v=SdL55HWNPRMueckmeldung vom Teensy
          print("\n  **************************************************************************** ")
          print("\ncode ist MESSUNG_START")
-         
          
          
          masterstatus |= (1<<MESSUNG_RUN) // Messung lauft, Daten kommen im Intervalltakt
