@@ -192,9 +192,9 @@ open class usb_teensy: NSObject
          
          var result = rawhid_recv(0, &read_byteArray, Int32(BUFFER_SIZE), 150)
          
- 
-   //      print("*cont_read_USB result: \(result) \((String(format:"%02X", read_byteArray[0]))) \((String(format:"%02X", read_byteArray[1]))) \((String(format:"%02X", read_byteArray[2]))) \((String(format:"%02X", read_byteArray[3])))")
-          //print("tempbyteArray in Timer: *\(read_byteArray)*")
+         
+         //      print("*cont_read_USB result: \(result) \((String(format:"%02X", read_byteArray[0]))) \((String(format:"%02X", read_byteArray[1]))) \((String(format:"%02X", read_byteArray[2]))) \((String(format:"%02X", read_byteArray[3])))")
+         //print("tempbyteArray in Timer: *\(read_byteArray)*")
          // var timerdic: [String: Int]
          
          /*
@@ -247,15 +247,15 @@ open class usb_teensy: NSObject
             let codehex = read_byteArray[0]
             
             // http://dev.iachieved.it/iachievedit/notifications-and-userinfo-with-swift-3-0/
-             let nc = NotificationCenter.default
-             nc.post(name:Notification.Name(rawValue:"newdata"),
-             object: nil,
-             userInfo: ["message":"neue Daten", "data":last_read_byteArray])
+            let nc = NotificationCenter.default
+            nc.post(name:Notification.Name(rawValue:"newdata"),
+                    object: nil,
+                    userInfo: ["message":"neue Daten", "data":last_read_byteArray])
             
-           // print("+ new read_byteArray in Timer:", terminator: "")
+            // print("+ new read_byteArray in Timer:", terminator: "")
             //for  i in 0...31
             //{
-              // print(" \(read_byteArray[i])", terminator: "")
+            // print(" \(read_byteArray[i])", terminator: "")
             //}
             //print("")
             //let stL = NSString(format:"%2X", read_byteArray[0]) as String
@@ -270,7 +270,7 @@ open class usb_teensy: NSObject
             
             //print("")
             //var st = NSString(format:"%2X", n) as String
-       //     } // end if codehex
+            //     } // end if codehex
          }
          else
          {

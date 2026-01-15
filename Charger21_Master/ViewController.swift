@@ -263,6 +263,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let BATT_MIN_BIT  = 1
    let BATT_DOWN_BIT =  2
    let BATT_OFF_BIT  =  3
+   let BATT_WARN_BIT =  7
    
    let SLAVELOADSTATUS_BYTE  =  32
    
@@ -300,6 +301,8 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
    let MESSUNG_WL_OK                =   6 // messungen der wl-devices abrufen
    let MESSUNG_TAKT_OK              =   5  // messen im Intervall-Takt des timers
    let MESSUNG_RUN:UInt8            =   4 // Messung laeuft
+   
+   
 
    // Bytes fuer Sicherungsort der Daten auf SD
    let TEENSY_DATA    =    0xFC // Daten des teensy lesen
@@ -994,10 +997,11 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
             let antwort = warnung.runModal()
             sender.state = .off
+            
             return
      
          }
-
+         loadstatus &= ~(1<<BATT_WARN_BIT)
      
       teensy.clear_bytearray()
       
@@ -1229,7 +1233,9 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          
          print("start_messung stop")
          sender.state = .off
+         
          stop_messung()
+         
       }
       
    }
@@ -1242,7 +1248,10 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       //teensy.write_byteArray[1] = UInt8(SAVE_SD_STOP)
       teensy.write_byteArray[1] |= (1<<SAVE_SD_STOP_BIT)
       print("stop_messung write_byteArray[1] nach: \(teensy.write_byteArray[1])")
- 
+      
+      teensy.write_byteArray[STROM_A_H_BYTE] = UInt8((STROM_REP & 0xFF00) >> 8) // hb
+      teensy.write_byteArray[STROM_A_L_BYTE] = UInt8((STROM_REP & 0x00FF) & 0xFF) // lb
+
       
       teensy.write_byteArray[BLOCKOFFSETLO_BYTE] = UInt8(startblock & 0x00FF) // Startblock
       teensy.write_byteArray[BLOCKOFFSETHI_BYTE] = UInt8((startblock & 0xFF00)>>8)
@@ -1264,7 +1273,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       var senderfolg = teensy.start_write_USB()
       if (senderfolg > 0)
       {
-         NSSound(named: NSSound.Name("Glass"))?.play()         
+         //NSSound(named: NSSound.Name("Glass"))?.play()         
       }
       print("stop_messung") // gibt neuen State an
       //self.datagraph.printwertesammlung()
@@ -1439,6 +1448,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
       print("stop_read_USB")
       teensy.report_stop_read_USB()
      // let readerfolg = teensy.start_read_USB(true)
+      
       //print("stop_read_USB readerfolg: \(readerfolg)")
    }
 
@@ -1799,12 +1809,14 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let Temp_Source_LO = UInt16(teensy.read_byteArray[TEMP_SOURCE_L_BYTE  + DATA_START_BYTE])
          let Temp_Source_HI = UInt16(teensy.read_byteArray[TEMP_SOURCE_H_BYTE  + DATA_START_BYTE])
          let Temp_Source = Temp_Source_LO //; | (Temp_Source_HI<<8)
-         print("Temp_Source: \(Temp_Source)")
-         let temp_c:Double = 232.0 - 1.2881 * Double(Temp_Source)
-         let temp_text = String(format: "%.1f", temp_c)
-         print("Temp_CELSIUS: \(temp_c)")
-         TempSourceFeld.stringValue = temp_text
-               
+         if(Temp_Source > 0)
+         {
+            print("Temp_SourceLO: \(Temp_Source_LO) Temp_Source_HI: \(Temp_Source_HI)")
+            let temp_c:Double = 232.0 - 1.2881 * Double(Temp_Source)
+            let temp_text = String(format: "%.1f", temp_c)
+            print("Temp_CELSIUS: \(temp_c)")
+            TempSourceFeld.stringValue = temp_text
+         }     
          // Temperatur BATT
          let Temp_Batt_LO = UInt16(teensy.read_byteArray[TEMP_BATT_L_BYTE  + DATA_START_BYTE])
          let Temp_Batt_HI = UInt16(teensy.read_byteArray[TEMP_BATT_H_BYTE  + DATA_START_BYTE])
@@ -1930,7 +1942,6 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               let Eff_Spannung = ADC_Spannung * SPANNUNG_KORRFAKTOR //Umrechnung reale Spannung zu ADC-Eingangsspannung
                               print("Spannung kanal \(kanal) wert: \(wert) Eff_Spannung: \(Eff_Spannung)")
 
-                              //SpannungFeld_A.floatValue = 2*ADC_Spannung // ADC-Spannung ist halbiert
                               SpannungFeld_A.floatValue = Eff_Spannung // ADC-Spannung ist halbiert
 
                               
@@ -1939,26 +1950,33 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               
                               if wert_norm > BATT_MAX
                               {
-                                 wert_norm = BATT_MAX
+                                 print("newLoggerDataAktion case 0 wert_norm ist > BATT_MAX")
+                                 wert_norm = Float(BATT_MAX)
                                  loadstatus |= (1<<BATT_MAX_BIT)
-                                 NSSound.beep()
-                                 let warnung = NSAlert.init()
-                                 warnung.messageText = "Spannung > BATT_MAX"
-                                 warnung.addButton(withTitle: "OK")
-                              
-                                 let antwort = warnung.runModal()
-                                 switch (antwort)
+                                 //NSSound.beep()
+                                 if((loadstatus & (1<<BATT_WARN_BIT)) == 0)
                                  {
-                                 case .alertFirstButtonReturn: // first button
-                                    print("FirstButton")
-                                    stop_messung();
-                                    return;
-                                 case .alertSecondButtonReturn: 
-                                    print("SecondButton")
-                                    return;     
-                                 default:
-                                    return
-                                                      
+                                    loadstatus |= (1<<BATT_WARN_BIT)
+                                    let warnung = NSAlert.init()
+                                    warnung.messageText = "Spannung > BATT_MAX"
+                                    warnung.addButton(withTitle: "OK")
+                                    
+                                    let antwort = warnung.runModal()
+                                    switch (antwort)
+                                    {
+                                    case .alertFirstButtonReturn: // first button
+                                       print("FirstButton")
+                                       stop_messung()
+                                       Start_Messung.state = .off
+                                       StromFeld.integerValue = 0;
+                                       
+                                       //masterstatus &= ~(1<<MESSUNG_RUN)
+                                       //return;
+                                       
+                                    default:
+                                       print("default")
+                                       
+                                    }
                                  }
                                   
                                  
@@ -1997,28 +2015,34 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
                               
                               if wert_norm > BATT_MAX
                               {
-                                 print("wert_norm > BATT_MAX")
-                                 wert_norm = BATT_MAX
+                                 print("newLoggerDataAktion case 1 wert_norm ist > BATT_MAX")
+                                 wert_norm = Float(BATT_MAX)
                                  loadstatus |= (1<<BATT_MAX_BIT)
-                                 
-                                 let warnung = NSAlert.init()
-                                 warnung.messageText = "Spannung > BATT_MAX"
-                                 warnung.addButton(withTitle: "OK")
-                              
-                                 let antwort = warnung.runModal()
-                                 switch (antwort)
+                                 //NSSound.beep()
+                                 if((loadstatus & (1<<BATT_WARN_BIT)) == 0)
                                  {
-                                 case .alertFirstButtonReturn: // first button
-                                    print("FirstButton")
-                                    stop_messung();
-                                    return;
-                                 case .alertSecondButtonReturn: 
-                                    print("SecondButton")
-                                    return;     
-                                 default:
-                                    return
-                                                      
+                                    loadstatus |= (1<<BATT_WARN_BIT)
+                                    let warnung = NSAlert.init()
+                                    warnung.messageText = "Spannung > BATT_MAX"
+                                    warnung.addButton(withTitle: "OK")
+                                    
+                                    let antwort = warnung.runModal()
+                                    switch (antwort)
+                                    {
+                                    case .alertFirstButtonReturn: // first button
+                                       print("FirstButton")
+                                       stop_messung()
+                                       Start_Messung.state = .off
+                                       StromFeld.integerValue = 0;
+                                       
+                                       //masterstatus &= ~(1<<MESSUNG_RUN)
+                                       //return;
+                                       
+                                    default:
+                                       print("default")                                       
+                                    }
                                  }
+                                 
                                  
                               }
                               /*
@@ -2273,7 +2297,7 @@ class rDataViewController: NSViewController, NSWindowDelegate, AVAudioPlayerDele
          let bufsize = BUFFER_SIZE-1
          print("lastbyte: \(teensy.read_byteArray[BUFFER_SIZE - 1])")
          
-         teensy.report_stop_read_USB()
+         //teensy.report_stop_read_USB()
          
          Start_Messung.state = convertToNSControlStateValue(0)
          
